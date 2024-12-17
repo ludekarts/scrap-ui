@@ -8,8 +8,10 @@
   ],
   "main": "./dist/scrap-ui.umd.cjs",
   "module": "./dist/scrap-ui.js",
+  "types": "./dist/scrap-ui.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/scrap-ui.d.ts",
       "import": "./dist/scrap-ui.js",
       "require": "./dist/scrap-ui.umd.cjs"
     },

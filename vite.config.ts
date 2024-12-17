@@ -14,14 +14,11 @@ export default defineConfig({
     }),
   ],
   build: {
-    // library entry and output settings
     lib: {
-      entry: resolve(__dirname, "lib/main.ts"),
       name: "scrap-ui",
       fileName: "scrap-ui",
+      entry: resolve(__dirname, "lib/main.ts"),
     },
-    // bundler options
-    // externalize react-related imports
     rollupOptions: {
       external: ["react", "react-dom", "react/jsx-runtime"],
       output: {
