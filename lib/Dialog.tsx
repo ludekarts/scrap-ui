@@ -61,6 +61,7 @@ const dialogStore = (function () {
       }
       // Close by event.
       else if (event !== undefined && event !== null) {
+        // Close by form submit.
         if (event?.type === "submit") {
           event.preventDefault();
           const form = event.target as HTMLFormElement;
@@ -79,7 +80,9 @@ const dialogStore = (function () {
               form.reset();
             }, dialogData.dealy || 300);
           }
-        } else if (event?.type === "click") {
+        }
+        // Close by button click.
+        else if (event?.type === "click") {
           const button = event.target as HTMLButtonElement;
           const dialogElement = button.closest("dialog");
           if (!dialogElement)
@@ -214,62 +217,8 @@ export function useDialogData(name: string) {
   return props;
 }
 /*
-
-
-
-  -----------------------------
-
-export function openDialog(name: string, data: Record<string, any> = {}) {
-  const dialog = document.getElementById(name) as HTMLDialogElement;
-  if (!dialog) throw new Error(`Dialog with name "${name}" not found`);
-  Object.keys(data).length && dialogDataStore.set(name, data);
-  dialog.showModal();
   // Fix for notworking autofocus fetaure in React.
   (dialog.querySelector("[data-focus-on-open]") as HTMLFormElement)?.focus();
-  return new Promise((resolve) => {
-    dialogStore.set(name, resolve);
-  });
-}
-
-type CloseEvent =
-  | string
-  | React.FormEvent<HTMLFormElement>
-  | React.MouseEvent<HTMLButtonElement>;
-
-export function closeDialog(event: CloseEvent, data?: any) {
-  if (typeof event === "string") {
-    const dialog = document.getElementById(event) as HTMLDialogElement;
-    if (!dialog) throw new Error(`Dialog with name "${event}" not found`);
-    dialog.close();
-    dialogStore.get(event)?.(data);
-    dialogStore.delete(event);
-    dialogDataStore.delete(event);
-  } else if (typeof event === "object") {
-    if (event?.type === "submit") {
-      event.preventDefault();
-      const form = event.target as HTMLFormElement;
-      const dialog = form.closest("dialog");
-      if (!dialog) throw new Error("Coud not find dialog element to close");
-      dialog?.close();
-      dialogStore.get(dialog.id)?.(getFormFields(form));
-      dialogStore.delete(event);
-      dialogDataStore.delete(event);
-      form.reset();
-    } else if (event?.type === "click") {
-      const button = event.target as HTMLButtonElement;
-      const dialog = button.closest("dialog");
-      if (!dialog) throw new Error("Coud not find dialog element to close");
-      dialog?.close();
-      dialogStore.get(dialog.id)?.();
-      dialogStore.delete(event);
-      dialogDataStore.delete(event);
-    }
-  }
-}
-
-export function useDialogData<T>(name: string) {
-  return (dialogDataStore.get(name) || {}) as T;
-}
 */
 
 // ---- Helpers ----------------

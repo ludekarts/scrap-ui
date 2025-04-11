@@ -9,6 +9,11 @@ import { useState } from "react";
 import "./styles/preflight.css";
 import "./styles/playground.css";
 
+type DialogResult = {
+  login: string;
+  password: string;
+};
+
 export default function Playground() {
   const [emoji, setEmoji] = useState("🍓");
 
@@ -21,7 +26,13 @@ export default function Playground() {
   };
   return (
     <main>
-      <button onClick={async () => console.log(await openDialog("dialogOne"))}>
+      <button
+        onClick={async () =>
+          console.log(
+            await openDialog<DialogResult>("dialogOne", { label: emoji })
+          )
+        }
+      >
         Open Dialog Two
       </button>
       <br />
