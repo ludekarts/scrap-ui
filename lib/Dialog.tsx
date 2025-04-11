@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   name: string;
@@ -6,9 +6,9 @@ interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
 }
 
 const dialogStore = new Map();
-const dialogArgsStore = new Map();
+const dialogDataStore = new Map();
 
-export function Dialog(props: DialogProps) {
+export function Dialog(props: DialogProps): JSX.Element {
   const { name, className, children, noDismiss = false } = props;
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -54,10 +54,10 @@ export function Dialog(props: DialogProps) {
   );
 }
 
-export function openDialog(name: string, ...args: any[]) {
+export function openDialog(name: string, data: Record<string, any> = {}) {
   const dialog = document.getElementById(name) as HTMLDialogElement;
   if (!dialog) throw new Error(`Dialog with name "${name}" not found`);
-  args.length && dialogArgsStore.set(name, args);
+  Object.keys(data).length && dialogDataStore.set(name, data);
   dialog.showModal();
   // Fix for notworking autofocus fetaure in React.
   (dialog.querySelector("[data-focus-on-open]") as HTMLFormElement)?.focus();
@@ -78,7 +78,7 @@ export function closeDialog(event: CloseEvent, data?: any) {
     dialog.close();
     dialogStore.get(event)?.(data);
     dialogStore.delete(event);
-    dialogArgsStore.delete(event);
+    dialogDataStore.delete(event);
   } else if (typeof event === "object") {
     if (event?.type === "submit") {
       event.preventDefault();
@@ -88,7 +88,7 @@ export function closeDialog(event: CloseEvent, data?: any) {
       dialog?.close();
       dialogStore.get(dialog.id)?.(getFormFields(form));
       dialogStore.delete(event);
-      dialogArgsStore.delete(event);
+      dialogDataStore.delete(event);
       form.reset();
     } else if (event?.type === "click") {
       const button = event.target as HTMLButtonElement;
@@ -97,13 +97,13 @@ export function closeDialog(event: CloseEvent, data?: any) {
       dialog?.close();
       dialogStore.get(dialog.id)?.();
       dialogStore.delete(event);
-      dialogArgsStore.delete(event);
+      dialogDataStore.delete(event);
     }
   }
 }
 
-export function useDialogArgs(name: string) {
-  return dialogArgsStore.get(name);
+export function useDialogData<T>(name: string) {
+  return (dialogDataStore.get(name) || {}) as T;
 }
 
 // ---- Helpers ----------------
@@ -136,40 +136,13 @@ function getHeadAndTail(source: any[]) {
 }
 
 // ---- Temporary  ----------------
+
 type FormValue = null | string | boolean | { value: string; checked: boolean };
 type FormFields = Record<string, FormValue>;
 
 type FormFieldsOptions = {
   includeCheckboxValues: boolean;
 };
-
-/**
- *
- * Get an object with all form fields and their values.
- *
- * ⚠️ NOTICE:
- * In case of checkboxes the value is replaced with "checked" state since in most cases this is what you want
- * from toggle switch rather than the value that is not changing.
- *
- * @example
- *
- * <form id="myForm">
- *   <input type="text" name="name" value="John">
- *   <input type="number" name="age" value="25">
- *   <input type="radio" name="mood" value="bad">
- *   <input type="radio" name="mood" value="good" checked>
- *   <input type="checkbox" name="active" value="🔥" checked>
- * </form>
- *
- * const { name, age, mood, active } = getFormFields("#myForm");
- * // active => true
- *
- * OR W/ options
- *
- * const { name, age, mood, active } = getFormFields("#myForm",  { includeCheckboxValues: true });
- * // active => { value: "🔥", checked: true }
- *
- */
 
 export function getFormFields(
   form: HTMLFormElement,
@@ -201,45 +174,6 @@ export function getFormFields(
   );
 }
 
-/**
- * This is an imperative way to update a form. When providing a @source object all form's inputs that names matches
- * fields in @source will be translated into the inputs "value".
- *
- *
- * @example
- *
- *💡HINT:
- * If you wnant to update other properties on the input e.g. "checked" field then use object notation
- * instead a plain value like so:
-
- * formUpdate("#form", {
- *   name: "Rex",
- *   active: {
- *     checked: true,
- *     value: "🦖"
- *   }
- * });
- *
- * 💡HINT:
- *  If you want to update a multiple radio buttons with same name then just treat them as a one files input
- *  and set the value normally e.g.:
- *
- *  <form id="form">
- *    <input type="radio" name="mood" value="bad">
- *    <input type="radio" name="mood" value="neutral" checked>
- *    <input type="radio" name="mood" value="good">
- *  </form>
- *
- *  . . .
- *
- * formUpdate("#form", {
- *  mood: {
- *     value: "good",
- *     checked: true,
- *   }
- * });
- *
- **/
 export function updateForm(
   selector: HTMLFormElement | string,
   source: FormFields
