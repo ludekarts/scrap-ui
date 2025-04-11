@@ -9,7 +9,7 @@ const dialogStore = new Map();
 const dialogDataStore = new Map();
 
 export function Dialog(props: DialogProps): JSX.Element {
-  const { name, className, children, noDismiss = false } = props;
+  const { name, className, children, noDismiss = false, open } = props;
   const dialog = useRef<HTMLDialogElement>(null);
 
   // Prevents from memory leak when user close dialog with <form method="dialog">.
@@ -47,7 +47,17 @@ export function Dialog(props: DialogProps): JSX.Element {
     }
   }, []);
 
-  return (
+  useEffect(() => {
+    if (dialog.current) {
+      if (open) {
+        dialog.current.showModal();
+      } else {
+        dialog.current.close();
+      }
+    }
+  }, [open]);
+
+  return !open ? null : (
     <dialog id={name} className={className} ref={dialog}>
       {children}
     </dialog>
