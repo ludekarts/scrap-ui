@@ -1,65 +1,64 @@
-import { Dialog, closeDialog, openDialog } from "@ludekarts/scrap-ui";
+import {
+  Dialog,
+  openDialog,
+  useDialogData,
+  closeDialog,
+} from "@ludekarts/scrap-ui";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import "./styles/preflight.css";
 import "./styles/playground.css";
 
 export default function Playground() {
-  const [show, setShow] = useState(false);
+  const [emoji, setEmoji] = useState("🍓");
 
+  const randomEmoji = () => {
+    setEmoji(
+      ["🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐", "🍒"][
+        Math.floor(Math.random() * 10)
+      ]
+    );
+  };
   return (
     <main>
+      <button onClick={async () => console.log(await openDialog("dialogOne"))}>
+        Open Dialog Two
+      </button>
+      <br />
       <button
-        onClick={() => {
-          document.querySelector("#d3")?.showModal();
+        onClick={async () => {
+          const count = await openDialog<number>("dialogThree", {
+            label: emoji,
+          });
+          console.log("count", count);
         }}
       >
-        OpenDialog
+        Open Dialog Three
       </button>
-      {/* <button onClick={() => setShow(!show)}>Open Dialog</button> */}
-
-      {/* <TestDialog open={show} onClose={() => setShow(false)} /> */}
-
-      <dialog id="d3" className="d bottom" data-scrap-ui="dialog">
-        Hello dialog
-      </dialog>
-
-      {/*
-      <Dialog name="dialog">
-        <form onSubmit={closeDialog}>
-          <h1>Hello Dialog</h1>
-          <input name="login" type="text" placeholder="Login" />
-          <input name="password" type="password" placeholder="Password" />
-          <button
-            type="button"
-            onClick={() => openDialog("din").then((r) => console.log(">>", r))}
-          >
-            Open IN
-          </button>
-          <button type="submit">Close</button>
-        </form>
-        <Dialog noDismiss name="din">
-          <div>
-            <h1 tabIndex={0}>Dialog inside dialog</h1>
-            <button onClick={closeDialog}>X</button>
-          </div>
-          <div>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit.</p>
-            <p>
-              Inventore architecto dicta, repellendus quisquam debitis beatae
-              est totam numquam itaque rem, iure modi vero saepe commodi
-              molestiae hic exercitationem dignissimos dolorum?
-            </p>
-            <div>
-              <button onClick={() => closeDialog("din", 12)}>CLOSE</button>
-              <form method="dialog">
-                <button type="submit">CLOSE SUBMIT</button>
-              </form>
-            </div>
-          </div>
-        </Dialog>
-      </Dialog> */}
+      <br />
+      <button onClick={randomEmoji}>EMOJI</button>
+      {/* <DialogTwo /> */}
+      {/* <DialogThree /> */}
+      <DialogOne />
     </main>
+  );
+}
+
+function DialogTwo() {
+  return (
+    <Dialog name="dialogTwo" className="d bottom">
+      Hello dialog 2️⃣
+    </Dialog>
+  );
+}
+
+function DialogThree() {
+  const { label } = useDialogData("dialogThree");
+  return (
+    <Dialog name="dialogThree" className="d bottom">
+      <h1>Hello dialog 3️⃣ {label}</h1>
+      <button onClick={() => closeDialog("dialogThree")}>✖️</button>
+    </Dialog>
   );
 }
 
@@ -84,5 +83,44 @@ function TestDialog({ open, onClose }: { open: boolean }) {
         )}
       </Dialog>
     </AnimatePresence>
+  );
+}
+
+function DialogOne() {
+  return (
+    <Dialog name="dialogOne">
+      <form onSubmit={closeDialog}>
+        <h1>Hello Dialog</h1>
+        <input name="login" type="text" placeholder="Login" />
+        <input name="password" type="password" placeholder="Password" />
+        <button
+          type="button"
+          onClick={() => openDialog("din").then((r) => console.log(">>", r))}
+        >
+          Open IN
+        </button>
+        <button type="submit">Close</button>
+      </form>
+      <Dialog noDismiss name="din">
+        <div>
+          <h1 tabIndex={0}>Dialog inside dialog</h1>
+          <button onClick={closeDialog}>X</button>
+        </div>
+        <div>
+          <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit.</p>
+          <p>
+            Inventore architecto dicta, repellendus quisquam debitis beatae est
+            totam numquam itaque rem, iure modi vero saepe commodi molestiae hic
+            exercitationem dignissimos dolorum?
+          </p>
+          <div>
+            <button onClick={() => closeDialog("din", 12)}>CLOSE</button>
+            <form method="dialog">
+              <button type="submit">CLOSE SUBMIT</button>
+            </form>
+          </div>
+        </div>
+      </Dialog>
+    </Dialog>
   );
 }
