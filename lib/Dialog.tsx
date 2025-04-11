@@ -14,10 +14,10 @@ type CloseTrigger =
 type ListenerFn = () => void;
 const emptyProps = { open: false };
 
-type DialogData = {
+type DialogData<P = any> = {
   delay: number;
   resolve: (value: any) => void;
-  props: { open: boolean } & Record<string, any>;
+  props: { open: boolean } & Record<string, P>;
 };
 
 type DialogsMap = Map<string, DialogData>;
@@ -117,13 +117,13 @@ const dialogStore = (function () {
       };
     },
 
-    getDialogProps(name: string) {
+    getDialogProps<P>(name: string) {
       return () => {
         const dialogData = dialogs.get(name);
         if (dialogData && dialogData.props) {
-          return dialogData.props;
+          return dialogData.props as DialogData["props"] & P;
         } else {
-          return emptyProps as DialogData["props"];
+          return emptyProps as DialogData["props"] & P;
         }
       };
     },
@@ -202,14 +202,14 @@ export function closeDialog(event: CloseTrigger, closeData?: any) {
   dialogStore.closeDialog(event, closeData);
 }
 
-export function useDialogData(name: string) {
-  const props = useSyncExternalStore(
+export function useDialogData<P = {}>(name: string): { open: boolean } & P {
+  return useSyncExternalStore(
     dialogStore.subscribe(name),
-    dialogStore.getDialogProps(name),
-    dialogStore.getDialogProps(name)
+    dialogStore.getDialogProps<P>(name),
+    dialogStore.getDialogProps<P>(name)
   );
-  return props;
 }
+
 /*
   // Fix for notworking autofocus fetaure in React.
   (dialog.querySelector("[data-focus-on-open]") as HTMLFormElement)?.focus();

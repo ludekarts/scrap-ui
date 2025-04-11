@@ -104,7 +104,7 @@ function TestDialog({ open, onClose }: { open: boolean }) {
 }
 
 function DialogOne() {
-  const x = useDialogData("dialogOne");
+  const x = useDialogData<DialogProps>("dialogOne");
 
   return (
     <Dialog name="dialogOne">
