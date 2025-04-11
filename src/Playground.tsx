@@ -14,6 +14,10 @@ type DialogResult = {
   password: string;
 };
 
+type DialogProps = {
+  label: string;
+};
+
 export default function Playground() {
   const [emoji, setEmoji] = useState("🍓");
 
@@ -29,7 +33,9 @@ export default function Playground() {
       <button
         onClick={async () =>
           console.log(
-            await openDialog<DialogResult>("dialogOne", { label: emoji })
+            await openDialog<DialogResult, DialogProps>("dialogOne", {
+              label: emoji,
+            })
           )
         }
       >
@@ -98,6 +104,8 @@ function TestDialog({ open, onClose }: { open: boolean }) {
 }
 
 function DialogOne() {
+  const x = useDialogData("dialogOne");
+
   return (
     <Dialog name="dialogOne">
       <form onSubmit={closeDialog}>
