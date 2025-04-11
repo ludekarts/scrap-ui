@@ -9,23 +9,20 @@ export default function Playground() {
 
   return (
     <main>
-      {/* <button onClick={() => openDialog("dialog")}>OpenDialog</button> */}
-      <button onClick={() => setShow(!show)}>Open Dialog</button>
+      <button
+        onClick={() => {
+          document.querySelector("#d3")?.showModal();
+        }}
+      >
+        OpenDialog
+      </button>
+      {/* <button onClick={() => setShow(!show)}>Open Dialog</button> */}
 
-      <TestDialog open={show} onClose={() => setShow(false)} />
+      {/* <TestDialog open={show} onClose={() => setShow(false)} /> */}
 
-      {/* <AnimatePresence>
-        {show && (
-          <motion.div
-            exit={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            initial={{ opacity: 0, y: 20 }}
-          >
-
-          </motion.div>
-        )}
-      </AnimatePresence> */}
+      <dialog id="d3" className="d bottom" data-scrap-ui="dialog">
+        Hello dialog
+      </dialog>
 
       {/*
       <Dialog name="dialog">
@@ -68,13 +65,24 @@ export default function Playground() {
 
 function TestDialog({ open, onClose }: { open: boolean }) {
   return (
-    <Dialog name="d1" open={open} className="d bottom no-backdrop-">
-      <div className="frame">
-        <h1>
-          <span>Hello Dialog</span>
-          <button onClick={onClose}>✖️</button>
-        </h1>
-      </div>
-    </Dialog>
+    <AnimatePresence>
+      <Dialog name="d1" className="testDialog no-backdrop">
+        {open && (
+          <motion.div
+            exit={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+          >
+            <div className="frame">
+              <h1>
+                <span>Hello Dialog</span>
+                <button onClick={onClose}>✖️</button>
+              </h1>
+            </div>
+          </motion.div>
+        )}
+      </Dialog>
+    </AnimatePresence>
   );
 }
