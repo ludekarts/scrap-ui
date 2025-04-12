@@ -16,6 +16,7 @@ body {
   max-height: 100%;
   font-family: monospace;
   background: transparent;
+  overflow-x: hidden;
 
   & .frame {
     width: 100%;
@@ -59,4 +60,5 @@ body {
 
 .no-backdrop::backdrop {
   display: none;
+  pointer-events: none;
 }

@@ -20,6 +20,7 @@ type DialogProps = {
 
 export default function Playground() {
   const [emoji, setEmoji] = useState("🍓");
+  const [show, toggleShow] = useState(false);
 
   const randomEmoji = () => {
     setEmoji(
@@ -54,8 +55,34 @@ export default function Playground() {
       </button>
       <br />
       <button onClick={randomEmoji}>EMOJI</button>
+      <br />
+      <button
+        onClick={() => {
+          openDialog("d1");
+        }}
+      >
+        TEST dialog
+      </button>
+      <br />
+      <button
+        onClick={() => {
+          toggleShow(true);
+          openDialog("d1");
+        }}
+      >
+        Toggle
+      </button>
       {/* <DialogTwo /> */}
       {/* <DialogThree /> */}
+      <TestDialog
+        open={show}
+        onClick={() => {
+          toggleShow(false);
+          setTimeout(() => {
+            closeDialog("d1");
+          }, 300);
+        }}
+      />
       <DialogOne />
     </main>
   );
@@ -70,7 +97,7 @@ function DialogTwo() {
 }
 
 function DialogThree() {
-  const { label } = useDialogData("dialogThree");
+  const { label } = useDialogData<DialogProps>("dialogThree");
   return (
     <Dialog name="dialogThree" className="d bottom">
       <h1>Hello dialog 3️⃣ {label}</h1>
@@ -79,37 +106,40 @@ function DialogThree() {
   );
 }
 
-function TestDialog({ open, onClose }: { open: boolean }) {
+function TestDialog({ open, onClick }) {
+  const { isOpen } = useDialogData("d1");
+  console.log(open);
+
   return (
-    <AnimatePresence>
-      <Dialog name="d1" className="testDialog no-backdrop">
+    <Dialog name="d1" className="testDialog isOpen">
+      <AnimatePresence>
         {open && (
           <motion.div
-            exit={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, x: 20 }}
           >
             <div className="frame">
               <h1>
-                <span>Hello Dialog</span>
-                <button onClick={onClose}>✖️</button>
+                <span>Hello Test Dialog</span>
+                <button onClick={onClick}>✖️</button>
               </h1>
             </div>
           </motion.div>
         )}
-      </Dialog>
-    </AnimatePresence>
+      </AnimatePresence>
+    </Dialog>
   );
 }
 
 function DialogOne() {
-  const x = useDialogData<DialogProps>("dialogOne");
+  const { label } = useDialogData<DialogProps>("dialogOne");
 
   return (
     <Dialog name="dialogOne">
       <form onSubmit={closeDialog}>
-        <h1>Hello Dialog</h1>
+        <h1>Hello Dialog {label}</h1>
         <input name="login" type="text" placeholder="Login" />
         <input name="password" type="password" placeholder="Password" />
         <button
@@ -118,7 +148,8 @@ function DialogOne() {
         >
           Open IN
         </button>
-        <button type="submit">Close</button>
+        <span> | </span>
+        <button type="submit">SAVE</button>
       </form>
       <Dialog noDismiss name="din">
         <div>

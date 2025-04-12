@@ -12,12 +12,12 @@ type CloseTrigger =
   | React.MouseEvent<HTMLButtonElement>;
 
 type ListenerFn = () => void;
-const emptyProps = { open: false };
+const emptyProps = { isOpen: false };
 
 type DialogData<P = any> = {
   delay: number;
   resolve: (value: any) => void;
-  props: { open: boolean } & Record<string, P>;
+  props: { isOpen: boolean } & Record<string, P>;
 };
 
 type DialogsMap = Map<string, DialogData>;
@@ -33,7 +33,7 @@ const dialogStore = (function () {
     dialogs: DialogsMap,
     resolveData: any
   ) {
-    dialogData.props = { ...dialogData.props, open: false };
+    dialogData.props = { ...dialogData.props, isOpen: false };
     dialogs.set(name, dialogData);
     dialogData.resolve(resolveData);
     setTimeout(() => {
@@ -47,7 +47,7 @@ const dialogStore = (function () {
         dialogs.set(name, {
           delay,
           resolve: () => {},
-          props: { open: false },
+          props: { isOpen: false },
         });
       return function unregisterDialog() {
         dialogs.delete(name);
@@ -66,7 +66,7 @@ const dialogStore = (function () {
       dialogs.set(name, {
         resolve,
         delay: dialogData.delay,
-        props: { ...dialogData.props, ...props, open: true },
+        props: { ...dialogData.props, ...props, isOpen: true },
       });
 
       listeners.get(name)?.forEach((listener: ListenerFn) => listener());
@@ -133,7 +133,7 @@ const dialogStore = (function () {
 export function Dialog(props: DialogProps): JSX.Element | null {
   const { name, className, children, noDismiss = false, delay } = props;
   const dialog = useRef<HTMLDialogElement>(null);
-  const { open } = useDialogData(name);
+  const { isOpen } = useDialogData(name);
 
   // Prevents from memory leak when user close dialog with <form method="dialog">.
   const handleCloseTrigger = (event: Event) => {
@@ -147,7 +147,7 @@ export function Dialog(props: DialogProps): JSX.Element | null {
   // Show dialog on open prop change.
   useEffect(() => {
     if (dialog.current) {
-      if (open) {
+      if (isOpen) {
         dialog.current.showModal();
         const [head, tail] = getHeadAndTail(getFocusableNodes(dialog.current));
         const keybordHandler = (event: KeyboardEvent) => {
@@ -180,9 +180,9 @@ export function Dialog(props: DialogProps): JSX.Element | null {
         dialog.current.close();
       }
     }
-  }, [open]);
+  }, [isOpen]);
 
-  return !open ? null : (
+  return !isOpen ? null : (
     <dialog id={name} className={className} ref={dialog} data-scrap-ui="dialog">
       {children}
     </dialog>
@@ -202,7 +202,7 @@ export function closeDialog(event: CloseTrigger, closeData?: any) {
   dialogStore.closeDialog(event, closeData);
 }
 
-export function useDialogData<P = {}>(name: string): { open: boolean } & P {
+export function useDialogData<P = {}>(name: string): DialogData["props"] & P {
   return useSyncExternalStore(
     dialogStore.subscribe(name),
     dialogStore.getDialogProps<P>(name),
