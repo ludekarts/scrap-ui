@@ -1,6 +1,47 @@
-.hello {
-  padding: 1em;
-  border-radius: 0.5em;
-  font-family: monospace;
-  border: 2px dashed rebeccapurple;
+:root {
+  --scrap-ui-anim-duration: 0.2s;
+}
+
+dialog[data-scrap-ui="dialog"] {
+  transition: display var(--scrap-ui-anim-duration) allow-discrete,
+    overlay var(--scrap-ui-anim-duration) allow-discrete,
+    opacity calc(var(--scrap-ui-anim-duration) + 0.3s),
+    translate calc(var(--scrap-ui-anim-duration) + 0.3s);
+
+  opacity: 0;
+
+  &:not(.suiNoDialogTranslate) {
+    translate: 0 1em;
+  }
+
+  &::backdrop {
+    transition: display var(--scrap-ui-anim-duration) allow-discrete,
+      overlay var(--scrap-ui-anim-duration) allow-discrete,
+      opacity var(--scrap-ui-anim-duration);
+    opacity: 0;
+  }
+
+  &[open] {
+    opacity: 1;
+    &:not(.suiNoDialogTranslate) {
+      translate: 0 0;
+    }
+
+    &::backdrop {
+      opacity: 1;
+    }
+  }
+
+  @starting-style {
+    &[open] {
+      opacity: 0;
+      &:not(.suiNoDialogTranslate) {
+        translate: 0 1em;
+      }
+
+      &::backdrop {
+        opacity: 0;
+      }
+    }
+  }
 }

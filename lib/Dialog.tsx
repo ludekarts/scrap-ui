@@ -1,112 +1,249 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useSyncExternalStore } from "react";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   name: string;
+  outDelay?: number;
   noDismiss?: boolean;
+  noAnimation?: boolean;
 }
 
-const dialogStore = new Map();
-const dialogDataStore = new Map();
+type CloseTrigger =
+  | string
+  | React.FormEvent<HTMLFormElement>
+  | React.MouseEvent<HTMLButtonElement>;
 
-export function Dialog(props: DialogProps): JSX.Element {
-  const { name, className, children, noDismiss = false } = props;
-  const dialog = useRef<HTMLDialogElement>(null);
+type ListenerFn = () => void;
+const emptyProps = { isOpen: false };
 
-  // Prevents from memory leak when user close dialog with <form method="dialog">.
-  const handleCloseEvent = () => closeDialog(name);
+type DialogData<P = any> = {
+  outDelay: number;
+  resolve: (value: any) => void;
+  props: { isOpen: boolean } & Record<string, P>;
+};
 
-  useEffect(() => {
-    if (dialog.current) {
-      const [head, tail] = getHeadAndTail(getFocusableNodes(dialog.current));
-      const keybordHandler = (event: KeyboardEvent) => {
-        if (event.key === "Tab") {
-          if (event.shiftKey) {
-            if (document.activeElement === head) {
-              event.preventDefault();
-              tail.focus();
-            }
-          } else {
-            if (document.activeElement === tail) {
-              event.preventDefault();
-              head.focus();
-            }
+type DialogsMap = Map<string, DialogData>;
+type ListenersMap = Map<string, ListenerFn[]>;
+
+const dialogStore = (function () {
+  const dialogs: DialogsMap = new Map();
+  const listeners: ListenersMap = new Map();
+
+  function updateDialogsData(
+    name: string,
+    dialogData: DialogData,
+    dialogs: DialogsMap,
+    resolveData: any
+  ) {
+    dialogData.props = { ...dialogData.props, isOpen: false };
+    dialogs.set(name, dialogData);
+    dialogData.resolve(resolveData);
+    setTimeout(() => {
+      listeners.get(name)?.forEach((listener: ListenerFn) => listener());
+    }, dialogData.outDelay);
+  }
+
+  return Object.freeze({
+    registerDialog(name: string, outDelay = 300) {
+      !dialogs.has(name) &&
+        dialogs.set(name, {
+          outDelay,
+          resolve: () => {},
+          props: { isOpen: false },
+        });
+      return function unregisterDialog() {
+        dialogs.delete(name);
+        listeners.delete(name);
+      };
+    },
+
+    showDialog<T, P>(
+      name: string,
+      resolve: (value: T | PromiseLike<T>) => void,
+      props?: P
+    ): void {
+      const dialogData = dialogs.get(name);
+      if (!dialogData) throw new Error(`Dialog with name "${name}" not found`);
+
+      dialogs.set(name, {
+        resolve,
+        outDelay: dialogData.outDelay,
+        props: { ...dialogData.props, ...props, isOpen: true },
+      });
+
+      listeners.get(name)?.forEach((listener: ListenerFn) => listener());
+    },
+
+    closeDialog(trigger: CloseTrigger, closeData?: any): void {
+      // Close by name.
+      if (typeof trigger === "string") {
+        const name = findAndCloseDialogElement(trigger);
+        const dialogData = dialogs.get(name);
+        dialogData && updateDialogsData(name, dialogData, dialogs, closeData);
+      }
+      // Close by event.
+      else if (trigger !== undefined && trigger !== null) {
+        // Close by form submit.
+        if (trigger?.type === "submit") {
+          trigger.preventDefault();
+          const form = trigger.target as HTMLFormElement;
+          const name = findAndCloseDialogElement(form);
+          const dialogData = dialogs.get(name);
+          if (dialogData) {
+            updateDialogsData(name, dialogData, dialogs, getFormFields(form));
+            form.reset();
           }
         }
-        if (event.key === "Escape") {
-          event.stopPropagation();
-          event.preventDefault();
-          !noDismiss && closeDialog(name);
+        // Close by button click.
+        else if (trigger?.type === "click") {
+          const button = trigger.target as HTMLButtonElement;
+          const name = findAndCloseDialogElement(button);
+          const dialogData = dialogs.get(name);
+          dialogData && updateDialogsData(name, dialogData, dialogs, {});
+        }
+      }
+    },
+
+    subscribe(name: string) {
+      return function addListener(listener: ListenerFn) {
+        !listeners.has(name) && listeners.set(name, []);
+        listeners.get(name)!.push(listener);
+        return function unsubscribe(): void {
+          if (listeners.has(name)) {
+            listeners.set(
+              name,
+              listeners.get(name)!.filter((l: ListenerFn) => l !== listener)
+            );
+          }
+        };
+      };
+    },
+
+    getDialogProps<P>(name: string) {
+      return () => {
+        const dialogData = dialogs.get(name);
+        if (dialogData && dialogData.props) {
+          return dialogData.props as DialogData["props"] & P;
+        } else {
+          return emptyProps as DialogData["props"] & P;
         }
       };
-      dialog.current.addEventListener("close", handleCloseEvent);
-      dialog.current.addEventListener("keydown", keybordHandler);
-      return () => {
-        dialog.current?.removeEventListener("close", handleCloseEvent);
-        dialog.current?.removeEventListener("keydown", keybordHandler);
-      };
-    }
-  }, []);
+    },
+  });
+})();
 
-  return (
-    <dialog id={name} className={className} ref={dialog}>
+export function Dialog(props: DialogProps): JSX.Element | null {
+  const {
+    name,
+    children,
+    outDelay,
+    className,
+    noAnimation,
+    noDismiss = false,
+  } = props;
+  const dialog = useRef<HTMLDialogElement>(null);
+  const config = noAnimation ? {} : { "data-scrap-ui": "dialog" };
+  const { isOpen } = useDialogData(name);
+
+  // Prevents from memory leak when user close dialog with <form method="dialog">.
+  const handleCloseTrigger = (event: Event) => {
+    event.preventDefault();
+    closeDialog(name);
+  };
+
+  // Regitsetr new dialog to store.
+  useEffect(() => dialogStore.registerDialog(name, outDelay), []);
+
+  // Show dialog on open prop change.
+  useEffect(() => {
+    if (dialog.current) {
+      if (isOpen) {
+        dialog.current.showModal();
+        const [head, tail] = getHeadAndTail(getFocusableNodes(dialog.current));
+        const keybordHandler = (event: KeyboardEvent) => {
+          if (event.key === "Tab") {
+            if (event.shiftKey) {
+              if (document.activeElement === head) {
+                event.preventDefault();
+                tail.focus();
+              }
+            } else {
+              if (document.activeElement === tail) {
+                event.preventDefault();
+                head.focus();
+              }
+            }
+          }
+          if (event.key === "Escape") {
+            event.stopPropagation();
+            event.preventDefault();
+            !noDismiss && closeDialog(name);
+          }
+        };
+        dialog.current.addEventListener("close", handleCloseTrigger);
+        dialog.current.addEventListener("keydown", keybordHandler);
+        return () => {
+          dialog.current?.removeEventListener("close", handleCloseTrigger);
+          dialog.current?.removeEventListener("keydown", keybordHandler);
+        };
+      } else {
+        dialog.current.close();
+      }
+    }
+  }, [isOpen]);
+
+  return !isOpen ? null : (
+    <dialog id={name} ref={dialog} className={className} {...config}>
       {children}
     </dialog>
   );
 }
 
-export function openDialog(name: string, data: Record<string, any> = {}) {
-  const dialog = document.getElementById(name) as HTMLDialogElement;
-  if (!dialog) throw new Error(`Dialog with name "${name}" not found`);
-  Object.keys(data).length && dialogDataStore.set(name, data);
-  dialog.showModal();
-  // Fix for notworking autofocus fetaure in React.
-  (dialog.querySelector("[data-focus-on-open]") as HTMLFormElement)?.focus();
-  return new Promise((resolve) => {
-    dialogStore.set(name, resolve);
+export async function openDialog<T, P = Record<string, any>>(
+  name: string,
+  props?: P
+) {
+  return new Promise<T>((resolve) => {
+    dialogStore.showDialog<T, P>(name, resolve, props);
   });
 }
 
-type CloseEvent =
-  | string
-  | React.FormEvent<HTMLFormElement>
-  | React.MouseEvent<HTMLButtonElement>;
-
-export function closeDialog(event: CloseEvent, data?: any) {
-  if (typeof event === "string") {
-    const dialog = document.getElementById(event) as HTMLDialogElement;
-    if (!dialog) throw new Error(`Dialog with name "${event}" not found`);
-    dialog.close();
-    dialogStore.get(event)?.(data);
-    dialogStore.delete(event);
-    dialogDataStore.delete(event);
-  } else if (typeof event === "object") {
-    if (event?.type === "submit") {
-      event.preventDefault();
-      const form = event.target as HTMLFormElement;
-      const dialog = form.closest("dialog");
-      if (!dialog) throw new Error("Coud not find dialog element to close");
-      dialog?.close();
-      dialogStore.get(dialog.id)?.(getFormFields(form));
-      dialogStore.delete(event);
-      dialogDataStore.delete(event);
-      form.reset();
-    } else if (event?.type === "click") {
-      const button = event.target as HTMLButtonElement;
-      const dialog = button.closest("dialog");
-      if (!dialog) throw new Error("Coud not find dialog element to close");
-      dialog?.close();
-      dialogStore.get(dialog.id)?.();
-      dialogStore.delete(event);
-      dialogDataStore.delete(event);
-    }
-  }
+export function closeDialog(event: CloseTrigger, closeData?: any) {
+  dialogStore.closeDialog(event, closeData);
 }
 
-export function useDialogData<T>(name: string) {
-  return (dialogDataStore.get(name) || {}) as T;
+export function useDialogData<P = {}>(name: string): DialogData["props"] & P {
+  return useSyncExternalStore(
+    dialogStore.subscribe(name),
+    dialogStore.getDialogProps<P>(name),
+    dialogStore.getDialogProps<P>(name)
+  );
 }
+
+/*
+  // Fix for notworking autofocus fetaure in React.
+  (dialog.querySelector("[data-focus-on-open]") as HTMLFormElement)?.focus();
+*/
 
 // ---- Helpers ----------------
+
+function findAndCloseDialogElement(trigger: any) {
+  let dialog: HTMLDialogElement | null = null;
+
+  if (typeof trigger === "string") {
+    dialog = document.getElementById(trigger) as HTMLDialogElement;
+  } else if (trigger instanceof HTMLFormElement) {
+    dialog = trigger.closest("dialog") as HTMLDialogElement;
+  } else if (trigger instanceof HTMLButtonElement) {
+    dialog = trigger.closest("dialog") as HTMLDialogElement;
+  }
+
+  if (!dialog) {
+    throw new Error("Coud not find dialog element to close");
+  }
+
+  dialog.close();
+  return dialog.id;
+}
 
 function isFocusable(node: Element) {
   return Boolean(
