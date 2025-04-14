@@ -8,7 +8,7 @@ body {
   margin: 0;
 }
 
-.testDialog {
+dialog {
   border: none;
   width: 100%;
   height: 100%;
@@ -39,18 +39,37 @@ body {
   }
 }
 
-.d {
+.dialog {
   width: 300px;
+  height: 140px;
   border: none;
-  background: rebeccapurple;
-  color: white;
   padding: 1em;
+  color: white;
   border-radius: 0.5em;
+  background: rebeccapurple;
 
-  & .center {
-    left: 50%;
-    top: 50%;
-    translate: -50% -50%;
+  &.center {
+    margin: auto;
+  }
+
+  &.xl {
+    width: 600px;
+    height: fit-content;
+    margin-bottom: auto;
+  }
+
+  &.blue {
+    background-color: #2277e6;
+  }
+}
+
+.rail {
+  gap: 1em;
+  display: flex;
+  align-items: center;
+
+  &.spread {
+    justify-content: space-between;
   }
 }
 

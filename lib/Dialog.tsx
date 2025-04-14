@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useSyncExternalStore } from "react";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   name: string;
-  delay?: number;
+  outDelay?: number;
   noDismiss?: boolean;
+  noAnimation?: boolean;
 }
 
 type CloseTrigger =
@@ -15,7 +16,7 @@ type ListenerFn = () => void;
 const emptyProps = { isOpen: false };
 
 type DialogData<P = any> = {
-  delay: number;
+  outDelay: number;
   resolve: (value: any) => void;
   props: { isOpen: boolean } & Record<string, P>;
 };
@@ -38,14 +39,14 @@ const dialogStore = (function () {
     dialogData.resolve(resolveData);
     setTimeout(() => {
       listeners.get(name)?.forEach((listener: ListenerFn) => listener());
-    }, dialogData.delay);
+    }, dialogData.outDelay);
   }
 
   return Object.freeze({
-    registerDialog(name: string, delay = 300) {
+    registerDialog(name: string, outDelay = 300) {
       !dialogs.has(name) &&
         dialogs.set(name, {
-          delay,
+          outDelay,
           resolve: () => {},
           props: { isOpen: false },
         });
@@ -65,7 +66,7 @@ const dialogStore = (function () {
 
       dialogs.set(name, {
         resolve,
-        delay: dialogData.delay,
+        outDelay: dialogData.outDelay,
         props: { ...dialogData.props, ...props, isOpen: true },
       });
 
@@ -131,8 +132,16 @@ const dialogStore = (function () {
 })();
 
 export function Dialog(props: DialogProps): JSX.Element | null {
-  const { name, className, children, noDismiss = false, delay } = props;
+  const {
+    name,
+    children,
+    outDelay,
+    className,
+    noAnimation,
+    noDismiss = false,
+  } = props;
   const dialog = useRef<HTMLDialogElement>(null);
+  const config = noAnimation ? {} : { "data-scrap-ui": "dialog" };
   const { isOpen } = useDialogData(name);
 
   // Prevents from memory leak when user close dialog with <form method="dialog">.
@@ -142,7 +151,7 @@ export function Dialog(props: DialogProps): JSX.Element | null {
   };
 
   // Regitsetr new dialog to store.
-  useEffect(() => dialogStore.registerDialog(name, delay), []);
+  useEffect(() => dialogStore.registerDialog(name, outDelay), []);
 
   // Show dialog on open prop change.
   useEffect(() => {
@@ -183,7 +192,7 @@ export function Dialog(props: DialogProps): JSX.Element | null {
   }, [isOpen]);
 
   return !isOpen ? null : (
-    <dialog id={name} className={className} ref={dialog} data-scrap-ui="dialog">
+    <dialog id={name} ref={dialog} className={className} {...config}>
       {children}
     </dialog>
   );
@@ -233,7 +242,6 @@ function findAndCloseDialogElement(trigger: any) {
   }
 
   dialog.close();
-
   return dialog.id;
 }
 

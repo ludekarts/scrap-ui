@@ -8,8 +8,11 @@ dialog[data-scrap-ui="dialog"] {
     opacity calc(var(--scrap-ui-anim-duration) + 0.3s),
     translate calc(var(--scrap-ui-anim-duration) + 0.3s);
 
-  translate: 0 1em;
   opacity: 0;
+
+  &:not(.suiNoDialogTranslate) {
+    translate: 0 1em;
+  }
 
   &::backdrop {
     transition: display var(--scrap-ui-anim-duration) allow-discrete,
@@ -20,7 +23,9 @@ dialog[data-scrap-ui="dialog"] {
 
   &[open] {
     opacity: 1;
-    translate: 0 0;
+    &:not(.suiNoDialogTranslate) {
+      translate: 0 0;
+    }
 
     &::backdrop {
       opacity: 1;
@@ -30,7 +35,9 @@ dialog[data-scrap-ui="dialog"] {
   @starting-style {
     &[open] {
       opacity: 0;
-      translate: 0 1em;
+      &:not(.suiNoDialogTranslate) {
+        translate: 0 1em;
+      }
 
       &::backdrop {
         opacity: 0;
