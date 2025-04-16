@@ -281,7 +281,7 @@ type FormFieldsOptions = {
   includeCheckboxValues: boolean;
 };
 
-export function getFormFields(
+function getFormFields(
   form: HTMLFormElement,
   options: FormFieldsOptions = { includeCheckboxValues: false }
 ) {
@@ -308,43 +308,5 @@ export function getFormFields(
       return acc;
     },
     {} as FormFields
-  );
-}
-
-export function updateForm(
-  selector: HTMLFormElement | string,
-  source: FormFields
-) {
-  const form =
-    selector instanceof HTMLFormElement
-      ? selector
-      : document.querySelector(selector);
-
-  if (form instanceof HTMLFormElement) {
-    (Array.from(form.elements) as HTMLFormElement[]).forEach((element) => {
-      if (element.name) {
-        const value = source[element.name];
-        if (value !== undefined) {
-          if (isSimpleValue(value)) {
-            element.value = value;
-          } else if (typeof value === "object" && value !== null) {
-            Object.keys(value as object).forEach(
-              (key) => (element[key] = value[key as keyof typeof value])
-            );
-          }
-        }
-      }
-    });
-  } else {
-    throw new Error("UpdateFormError:Cannot find form element to update");
-  }
-}
-
-function isSimpleValue(value: any) {
-  return (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "boolean" ||
-    typeof value === "number"
   );
 }

@@ -1,26 +1,27 @@
 import {
   Dialog,
   openDialog,
-  useDialogData,
   closeDialog,
+  useDialogData,
+  PopupMenu,
 } from "@ludekarts/scrap-ui";
-import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
+
+// import { useState } from "react";
 import "./styles/preflight.css";
 import "./styles/playground.css";
 
-type DialogResult = {
-  login: string;
-  password: string;
-};
+// type DialogResult = {
+//   login: string;
+//   password: string;
+// };
 
 type DialogProps = {
   label: string;
 };
 
 export default function Playground() {
-  const [emoji, setEmoji] = useState("🍓");
-  const [show, toggleShow] = useState(false);
+  // const [emoji, setEmoji] = useState("🍓");
+  // const [show, toggleShow] = useState(false);
 
   const showDialog = () => {
     openDialog("basicDialog");
@@ -32,6 +33,16 @@ export default function Playground() {
         <button onClick={showDialog}>Show dialog</button>
       </div>
       <DialogInDialog />
+
+      <div style={{ textAlign: "center" }}>
+        <PopupMenu name="menu" position="tl">
+          <button className="popup-button">Menu</button>
+          <dialog className="popup">
+            <button>A</button>
+            <button>B</button>
+          </dialog>
+        </PopupMenu>
+      </div>
     </main>
   );
 }

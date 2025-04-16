@@ -63,6 +63,11 @@ dialog {
   }
 }
 
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
 .rail {
   gap: 1em;
   display: flex;
@@ -80,4 +85,15 @@ dialog {
 .no-backdrop::backdrop {
   display: none;
   pointer-events: none;
+}
+.popup-button {
+  background-color: #2277e6;
+}
+
+.popup:popover-open {
+  background: rebeccapurple;
+  flex-direction: column;
+  display: flex;
+  width: 100px;
+  height: auto;
 }

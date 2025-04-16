@@ -2,6 +2,8 @@
   --scrap-ui-anim-duration: 0.2s;
 }
 
+/* DIALOG */
+
 dialog[data-scrap-ui="dialog"] {
   transition: display var(--scrap-ui-anim-duration) allow-discrete,
     overlay var(--scrap-ui-anim-duration) allow-discrete,
@@ -43,5 +45,40 @@ dialog[data-scrap-ui="dialog"] {
         opacity: 0;
       }
     }
+  }
+}
+
+/* POPOVER */
+
+.suianchor-button {
+  --sui-anchor-name: --sui-anchor-menu;
+  anchor-name: var(--anchor-name);
+}
+
+.sui-anchor-menu {
+  margin: 0;
+  inset: auto;
+  position: absolute;
+  --sui-anchor-name: --sui-anchor-menu;
+  position-anchor: var(--some-name);
+
+  &.tr {
+    right: anchor(right);
+    bottom: anchor(top);
+  }
+
+  &.tl {
+    left: anchor(left);
+    bottom: anchor(top);
+  }
+
+  &.bl {
+    left: anchor(left);
+    top: anchor(bottom);
+  }
+
+  &.br {
+    right: anchor(right);
+    top: anchor(bottom);
   }
 }
