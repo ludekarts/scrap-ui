@@ -35,11 +35,11 @@ export default function Playground() {
       <DialogInDialog />
 
       <div style={{ textAlign: "center" }}>
-        <PopupMenu name="menu" position="tl">
+        <PopupMenu name="menu" position="tl" keepOnInsideClick>
           <button className="popup-button">Menu</button>
           <dialog className="popup">
-            <button>A</button>
-            <button>B</button>
+            <button onClick={() => console.log("Clicked A")}>A</button>
+            <button onClick={() => console.log("Clicked B")}>B</button>
           </dialog>
         </PopupMenu>
       </div>

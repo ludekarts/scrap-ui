@@ -1,4 +1,4 @@
-import { Children, cloneElement, isValidElement } from "react";
+import { useRef, Children, cloneElement, isValidElement } from "react";
 import type { CSSProperties } from "react";
 
 type Position = "tl" | "tr" | "bl" | "br";
@@ -7,27 +7,32 @@ interface MenuPopupProps {
   name: string;
   position?: Position;
   children: React.ReactNode;
+  keepOnInsideClick?: boolean;
 }
 
 interface ButtonProps {
   className?: string;
-  // Add any other relevant button props here
-  [key: string]: any; // Allow other props (be careful with this)
+  [key: string]: any;
 }
 
 interface DialogProps {
   className?: string;
-  // Add any other relevant dialog props here
-  [key: string]: any; // Allow other props (be careful with this)
+  ref?: React.Ref<HTMLDialogElement>;
+  [key: string]: any;
 }
 
 export function PopupMenu(props: MenuPopupProps) {
-  const { name, children, position = "bl" } = props;
+  const { name, children, keepOnInsideClick = false, position = "bl" } = props;
+  const ref = useRef<HTMLDialogElement>(null);
 
   if (Children.count(children) !== 2) {
     console.error("MenuPopup must have 2 children <button/> and <dialog/>.");
     return null;
   }
+
+  const catchClicks = () => {
+    !keepOnInsideClick && ref.current && ref.current.hidePopover();
+  };
 
   return Children.map(children, (child, index) => {
     if (index === 0 && isValidElement(child) && child.type === "button") {
@@ -44,8 +49,10 @@ export function PopupMenu(props: MenuPopupProps) {
     ) {
       const dialog = child as React.ReactElement<DialogProps>;
       return cloneElement(dialog, {
+        ref,
         id: name,
         popover: "auto",
+        onClick: catchClicks,
         className: `sui-anchor-menu ${position} ${
           dialog.props.className ?? ""
         }`,
