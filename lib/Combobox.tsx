@@ -13,11 +13,11 @@ interface ComboboxProps {
   selectedItem?: string;
   listClassName?: string;
   children?: React.ReactNode;
-  onSelect?: (index: number) => void;
   onChange?: (phrase: string) => void;
+  onSelect?: (index: number, isEmptyNode: boolean) => void;
 }
 
-export function Combobox(props: ComboboxProps) {
+export default function Combobox(props: ComboboxProps) {
   const {
     name,
     onSelect,
@@ -53,8 +53,11 @@ export function Combobox(props: ComboboxProps) {
   };
 
   const selectOption = (index: number) => {
+    const isEmptyNode = Boolean(
+      (listboxRef.current?.children[index] as HTMLElement).dataset.emptyNode
+    );
     inputRef.current?.focus();
-    onSelect?.(index);
+    onSelect?.(index, isEmptyNode);
     toggleOpen(false);
     setHighlightedIndex(-1);
   };
@@ -63,7 +66,7 @@ export function Combobox(props: ComboboxProps) {
     const { key } = event;
     const count = Children.count(children);
 
-    // On no results allow only Escape & tab.
+    // On no results allow only Escape & Tab.
     if (!count && !["Escape", "Tab"].includes(key)) return;
 
     switch (key) {
@@ -103,8 +106,8 @@ export function Combobox(props: ComboboxProps) {
         }
         break;
       default:
-        // Reset highlight if user types characters, let useEffect handle filtering/opening
-        // setHighlightedIndex(-1); // Moved to filter useEffect
+        // Reset highlight if user types characters.
+        setHighlightedIndex(-1);
         break;
     }
   };
@@ -124,9 +127,9 @@ export function Combobox(props: ComboboxProps) {
   };
 
   useEffect(() => {
-    // Keep open if typing and results exist
+    // Keep open if typing and results exist.
     if (
-      selectedItem &&
+      inputValue.length > 0 &&
       inputValue !== selectedItem &&
       !isOpen &&
       Children.count(children)
@@ -145,7 +148,7 @@ export function Combobox(props: ComboboxProps) {
 
   // Set full name of selected item in input field.
   useEffect(() => {
-    setInputValue(selectedItem || "");
+    typeof selectedItem === "string" && setInputValue(selectedItem);
   }, [selectedItem]);
 
   // Handle clicks outside to close
@@ -189,17 +192,19 @@ export function Combobox(props: ComboboxProps) {
           ref={listboxRef}
           aria-labelledby={labelId}
           className={listClassName}
-          style={{ width: "100%" }}
-          // No need for 'hidden' attribute if conditionally rendered
+          style={{ position: "absolute", width: "100%" }}
+          // No need for 'hidden' attribute if conditionally rendered.
         >
           {isOpen &&
             Children.map(children, (child, index) =>
-              cloneElement(child as React.ReactElement<any>, {
-                role: "option",
-                id: `${name}-option-${index}`,
-                "data-index": index,
-                "aria-selected": index === highlightedIndex,
-              })
+              child === null
+                ? null
+                : cloneElement(child as React.ReactElement<any>, {
+                    role: "option",
+                    id: `${name}-option-${index}`,
+                    "data-index": index,
+                    "aria-selected": index === highlightedIndex,
+                  })
             )}
         </ul>
       }
