@@ -18,7 +18,7 @@ interface ComboboxProps {
   onSelect?: (index: number, isEmptyNode: boolean) => boolean | void;
 }
 
-const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
+export const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
   (props, ref) => {
     const {
       name,
@@ -57,7 +57,7 @@ const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
 
     const selectOption = (index: number) => {
       const isEmptyNode = Boolean(
-        (listboxRef.current?.children[index] as HTMLElement).dataset.emptyNode,
+        (listboxRef.current?.children[index] as HTMLElement).dataset.emptyNode
       );
       inputRef.current?.focus();
 
@@ -216,14 +216,13 @@ const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
                       id: `${name}-option-${index}`,
                       "data-index": index,
                       "aria-selected": index === highlightedIndex,
-                    }),
+                    })
               )}
           </ul>
         }
       </div>
     );
-  },
+  }
 );
 
 Combobox.displayName = "Combobox";
-export default Combobox;
