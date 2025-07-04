@@ -119,8 +119,10 @@ function createDialogStore(forceOpen: boolean = false) {
   let listener: (() => void) | undefined;
   let resolver: ((value: any) => void) | undefined;
   let state = { isOpen: forceOpen };
+  let lastActiveElement: HTMLElement | null = null;
   return {
     showDialog(resolve: any, props: Record<string, any> = {}) {
+      lastActiveElement = document.activeElement as HTMLElement;
       state = { ...state, ...props, isOpen: true };
       resolver = resolve;
       listener?.();
@@ -131,6 +133,13 @@ function createDialogStore(forceOpen: boolean = false) {
       listener?.();
       resolver?.(data);
       resolver = undefined;
+      // Restore focus to the last active element after dialog is closed.
+      setTimeout(() => {
+        if (lastActiveElement) {
+          lastActiveElement.focus();
+          lastActiveElement = null;
+        }
+      }, 0);
     },
 
     subscribe(cb: () => void) {
