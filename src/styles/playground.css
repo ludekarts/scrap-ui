@@ -53,3 +53,32 @@ dialog {
   border-top: 2px dashed black;
   border-left: 2px dashed black;
 }
+
+.name-form {
+  border: 2px solid black;
+  border-radius: 0.3em;
+  overflow: hidden;
+  margin: 0.5em 0;
+  display: flex;
+
+  & input[type="text"] {
+    min-width: 0;
+    flex: 1;
+    border: none;
+    padding: 0.2em 0.3em;
+    font-family: monospace;
+    &:focus {
+      outline: none;
+    }
+  }
+
+  & .px-2 {
+    padding: 0 0.3em;
+  }
+
+  & button {
+    background: black;
+    color: white;
+    border: none;
+  }
+}

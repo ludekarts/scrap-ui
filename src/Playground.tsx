@@ -3,15 +3,15 @@ import "./styles/playground.css";
 import { useState } from "react";
 import { createDialog } from "@ludekarts/scrap-ui";
 
-const [Dialog, ctrl] = createDialog({ forceOpen: true });
+const [MainDialog, ctrl] = createDialog({ forceOpen: false });
+const [SubDialog, subCtrl] = createDialog({ forceOpen: false });
 
 export default function Playground() {
-  let label = "Initail label 🏖️";
+  let icon = "🏖️";
 
-  const showBaseDialog = () => {
-    ctrl.show({
-      label,
-    });
+  const showBaseDialog = async () => {
+    const result = await ctrl.show({ icon });
+    console.log("Dialog closed with:", result);
   };
 
   return (
@@ -21,37 +21,64 @@ export default function Playground() {
         <button onClick={showBaseDialog}>SHOW DIALOG</button>
         <button
           onClick={() => {
-            label = "Updated label 💎";
+            icon = "💎";
           }}
         >
           Change Label
         </button>
       </div>
-      <BaseDialog />
+      <MainDialogComponent />
     </div>
   );
 }
 
-function BaseDialog() {
+function MainDialogComponent() {
   const [expended, setExpanded] = useState(false);
-  const { label = "🌋" } = ctrl.getState();
+  const { icon = "🌋" } = ctrl.getState();
+
+  const openSubdialog = async () => {
+    subCtrl.show();
+  };
 
   return (
-    <Dialog className={`border-dailog ${expended ? "" : "max-w-21"}`}>
+    <MainDialog className={`border-dailog ${expended ? "" : "max-w-21"}`}>
       <div className="rail spread">
-        <h2>Base Dialog</h2>
+        <h2>{icon} Base Dialog</h2>
         <button className="ghost" onClick={() => setExpanded(!expended)}>
           {expended ? "↙️" : "↗️"}
         </button>
       </div>
       <p>
-        This is a BaseDialog component. You can use it to create your own
-        dialogs 😉.
+        This is a MainDialog component. You can use it to create your own
+        dialogs.
       </p>
-      <p>Here you have an {label}</p>
+      <form className="name-form" onSubmit={ctrl.close}>
+        <input type="text" name="name" placeholder="Enter your name" />
+        <div className="rail px-2">
+          <input type="radio" name="toggle" value="☀️" defaultChecked />
+          <input type="radio" name="toggle" value="🌙" />
+        </div>
+        <button type="submit">Submit</button>
+      </form>
       <div className="rail">
         <button onClick={() => ctrl.close()}>Close</button>
+        <button onClick={openSubdialog}>Subdialog</button>
       </div>
-    </Dialog>
+      <SubDialogComponent />
+    </MainDialog>
+  );
+}
+
+function SubDialogComponent() {
+  return (
+    <SubDialog noDismiss>
+      <div className="rail spread">
+        <h2>🐋 Sub Dialog</h2>
+        <button className="ghost" onClick={() => subCtrl.close()}>
+          ✖️
+        </button>
+      </div>
+      <p>This is a SubDialog component.</p>
+    </SubDialog>
   );
 }

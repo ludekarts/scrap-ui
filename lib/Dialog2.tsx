@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useSyncExternalStore } from "react";
+import { getFormFields } from "@ludekarts/utility-belt";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   noDismiss?: boolean;
@@ -7,18 +8,18 @@ interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
 interface CreateDialogOptions {
   name?: string;
   forceOpen?: boolean;
+  formParser?: Record<string, any>;
 }
 
 export function createDialog(
   options: CreateDialogOptions
 ): [React.FC<DialogProps>, any] {
-  const { name, forceOpen = false } = options;
+  const { name, forceOpen = false, formParser } = options;
   const dialogId = getDialogId(name);
   const dialogStore = createDialogStore(forceOpen);
 
   const Dialog = (props: DialogProps) => {
     const { children, noDismiss, className } = props;
-
     const dialog = useRef<HTMLDialogElement>(null);
     const { isOpen } = useDialogState();
 
@@ -28,7 +29,7 @@ export function createDialog(
       dialogStore.closeDialog();
     };
 
-    // Show/hide dialog on open state change.
+    // Show/hide dialog. Handle focus trap and keyboard events.
     useEffect(() => {
       if (dialog.current) {
         if (isOpen) {
@@ -75,6 +76,8 @@ export function createDialog(
     );
   };
 
+  // State hook.
+
   function useDialogState() {
     return useSyncExternalStore(
       dialogStore.subscribe,
@@ -83,28 +86,38 @@ export function createDialog(
     );
   }
 
-  const controller = {
+  // Dialog Controller API.
+
+  const dialogController = {
     async show(props: Record<string, any> = {}) {
       return new Promise((resolve) => {
         dialogStore.showDialog(resolve, props);
       });
     },
 
-    close() {
-      dialogStore.closeDialog();
+    close(data?: any) {
+      // Handle clode by form submission.
+      if (data?.type === "submit") {
+        data.preventDefault();
+        dialogStore.closeDialog(
+          getFormFields(data.target as HTMLFormElement, formParser || {})
+        );
+      } else {
+        dialogStore.closeDialog(data);
+      }
     },
 
     getState: useDialogState,
   };
 
-  return [Dialog, controller];
+  return [Dialog, dialogController];
 }
 
 // ---- Helpers ----------------
 
 function createDialogStore(forceOpen: boolean = false) {
   let listener: (() => void) | undefined;
-  let resolver;
+  let resolver: ((value: any) => void) | undefined;
   let state = { isOpen: forceOpen };
   return {
     showDialog(resolve: any, props: Record<string, any> = {}) {
@@ -113,9 +126,11 @@ function createDialogStore(forceOpen: boolean = false) {
       listener?.();
     },
 
-    closeDialog() {
+    closeDialog(data?: any) {
       state = { ...state, isOpen: false };
       listener?.();
+      resolver?.(data);
+      resolver = undefined;
     },
 
     subscribe(cb: () => void) {
