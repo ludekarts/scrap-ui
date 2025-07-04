@@ -1,88 +1,101 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
-  outDelay?: number;
   noDismiss?: boolean;
-  noAnimation?: boolean;
+  forceOpen?: boolean;
+  children?: React.ReactNode;
 }
 
-type DialogRenderFn = React.FC<DialogProps>;
+interface CreateDialogOptions {
+  name?: string;
+  forceOpen?: boolean;
+}
 
-export function createDialog(name?: string) {
-  const dialogId =
-    name || `dialog-${Math.random().toString(36).substring(2, 15)}`;
+export function createDialog(
+  options: CreateDialogOptions
+): [React.FC<DialogProps>, any] {
+  const { name, forceOpen = false } = options;
+  const dialogId = getDialogId(name);
+  const dialogStore = createDialogStore(forceOpen);
 
-  const RenderDialog: DialogRenderFn = (props) => {
-    const {
-      children,
-      // outDelay,
-      className,
-      noAnimation,
-      noDismiss = false,
-    } = props;
+  console.log("RUN");
 
-    const [isOpen, toggleDialog] = useState(false);
+  const Dialog = (props: DialogProps) => {
+    const { children, className } = props;
+
+    const state = useSyncExternalStore(
+      dialogStore.subscribe,
+      dialogStore.getDialogProps,
+      dialogStore.getDialogProps
+    );
+
+    console.log(state);
+
     const dialog = useRef<HTMLDialogElement>(null);
-    const config = noAnimation ? {} : { "data-scrap-ui": "dialog" };
 
-    // Prevents from memory leak when user close dialog with <form method="dialog">.
-    const handleCloseTrigger = (event: Event) => {
-      event.preventDefault();
-      toggleDialog(false);
-    };
-
-    // Show dialog on open prop change.
     useEffect(() => {
-      if (dialog.current) {
-        if (isOpen) {
-          dialog.current.showModal();
-          const [head, tail] = getHeadAndTail(
-            getFocusableNodes(dialog.current)
-          );
-          const keybordHandler = (event: KeyboardEvent) => {
-            if (event.key === "Tab") {
-              if (event.shiftKey) {
-                if (document.activeElement === head) {
-                  event.preventDefault();
-                  tail.focus();
-                }
-              } else {
-                if (document.activeElement === tail) {
-                  event.preventDefault();
-                  head.focus();
-                }
-              }
-            }
-            if (event.key === "Escape") {
-              event.stopPropagation();
-              event.preventDefault();
-              !noDismiss && toggleDialog(false);
-            }
-          };
-          dialog.current.addEventListener("close", handleCloseTrigger);
-          dialog.current.addEventListener("keydown", keybordHandler);
-          return () => {
-            dialog.current?.removeEventListener("close", handleCloseTrigger);
-            dialog.current?.removeEventListener("keydown", keybordHandler);
-          };
-        } else {
-          dialog.current.close();
-        }
+      if (state.isOpen) {
+        dialog.current?.showModal();
+      } else {
+        dialog.current?.close();
       }
-    }, [isOpen]);
+    }, [state.isOpen]);
 
-    return !isOpen ? null : (
-      <dialog id={dialogId} ref={dialog} className={className} {...config}>
+    return !state.isOpen ? null : (
+      <dialog id={dialogId} ref={dialog} className={className}>
         {children}
       </dialog>
     );
   };
 
-  async function openDialog() {
-    return;
-  }
+  const controller = {
+    show() {
+      dialogStore.showDialog();
+    },
+    close() {
+      dialogStore.closeDialog();
+    },
+  };
 
-  return [RenderDialog, openDialog];
+  return [Dialog, controller];
+}
+
+// ---- Helpers ----------------
+
+function createDialogStore(forceOpen: boolean = false) {
+  let listener: (() => void) | undefined;
+  let state = { isOpen: forceOpen };
+  return {
+    showDialog(props: Record<string, any> = {}) {
+      state = { ...state, ...props, isOpen: true };
+      listener?.();
+    },
+
+    closeDialog() {
+      state = { ...state, isOpen: false };
+      listener?.();
+    },
+
+    subscribe(cb: () => void) {
+      listener = cb;
+      return () => {
+        listener = undefined;
+      };
+    },
+
+    getDialogProps() {
+      return state;
+    },
+  };
+}
+
+function getDialogId(name?: string) {
+  return name || `sui-dialog-${Math.random().toString(36).substring(2, 15)}`;
 }
 
 // Custom version of querySelectorAll that not return elements from nested dialogs.
