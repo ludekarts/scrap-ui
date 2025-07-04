@@ -1,13 +1,7 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useSyncExternalStore,
-} from "react";
+import React, { useRef, useEffect, useSyncExternalStore } from "react";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   noDismiss?: boolean;
-  children?: React.ReactNode;
 }
 
 interface CreateDialogOptions {
@@ -26,11 +20,7 @@ export function createDialog(
     const { children, noDismiss, className } = props;
 
     const dialog = useRef<HTMLDialogElement>(null);
-    const { isOpen } = useSyncExternalStore(
-      dialogStore.subscribe,
-      dialogStore.getDialogState,
-      dialogStore.getDialogState
-    );
+    const { isOpen } = useDialogState();
 
     // Prevents from memory leak when user close dialog with <form method="dialog">.
     const handleCloseTrigger = (event: Event) => {
@@ -85,13 +75,26 @@ export function createDialog(
     );
   };
 
+  function useDialogState() {
+    return useSyncExternalStore(
+      dialogStore.subscribe,
+      dialogStore.getDialogState,
+      dialogStore.getDialogState
+    );
+  }
+
   const controller = {
-    show() {
-      dialogStore.showDialog();
+    async show(props: Record<string, any> = {}) {
+      return new Promise((resolve) => {
+        dialogStore.showDialog(resolve, props);
+      });
     },
+
     close() {
       dialogStore.closeDialog();
     },
+
+    getState: useDialogState,
   };
 
   return [Dialog, controller];
@@ -101,10 +104,12 @@ export function createDialog(
 
 function createDialogStore(forceOpen: boolean = false) {
   let listener: (() => void) | undefined;
+  let resolver;
   let state = { isOpen: forceOpen };
   return {
-    showDialog(props: Record<string, any> = {}) {
+    showDialog(resolve: any, props: Record<string, any> = {}) {
       state = { ...state, ...props, isOpen: true };
+      resolver = resolve;
       listener?.();
     },
 
