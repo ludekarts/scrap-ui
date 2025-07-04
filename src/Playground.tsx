@@ -22,7 +22,7 @@ export default function Playground() {
         <div className="rail spread">
           <h2>Base Dialog</h2>
           <button className="ghost" onClick={() => setExpanded(!expended)}>
-            {expended ? "↔" : "⇹"}
+            {expended ? "↙️" : "↗️"}
           </button>
         </div>
         <p>

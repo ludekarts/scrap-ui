@@ -7,7 +7,6 @@ import React, {
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   noDismiss?: boolean;
-  forceOpen?: boolean;
   children?: React.ReactNode;
 }
 
@@ -23,30 +22,63 @@ export function createDialog(
   const dialogId = getDialogId(name);
   const dialogStore = createDialogStore(forceOpen);
 
-  console.log("RUN");
-
   const Dialog = (props: DialogProps) => {
-    const { children, className } = props;
-
-    const state = useSyncExternalStore(
-      dialogStore.subscribe,
-      dialogStore.getDialogProps,
-      dialogStore.getDialogProps
-    );
-
-    console.log(state);
+    const { children, noDismiss, className } = props;
 
     const dialog = useRef<HTMLDialogElement>(null);
+    const { isOpen } = useSyncExternalStore(
+      dialogStore.subscribe,
+      dialogStore.getDialogState,
+      dialogStore.getDialogState
+    );
 
+    // Prevents from memory leak when user close dialog with <form method="dialog">.
+    const handleCloseTrigger = (event: Event) => {
+      event.preventDefault();
+      dialogStore.closeDialog();
+    };
+
+    // Show/hide dialog on open state change.
     useEffect(() => {
-      if (state.isOpen) {
-        dialog.current?.showModal();
-      } else {
-        dialog.current?.close();
+      if (dialog.current) {
+        if (isOpen) {
+          dialog.current.showModal();
+          const [head, tail] = getHeadAndTail(
+            getFocusableNodes(dialog.current)
+          );
+          const keybordHandler = (event: KeyboardEvent) => {
+            if (event.key === "Tab") {
+              if (event.shiftKey) {
+                if (document.activeElement === head) {
+                  event.preventDefault();
+                  tail.focus();
+                }
+              } else {
+                if (document.activeElement === tail) {
+                  event.preventDefault();
+                  head.focus();
+                }
+              }
+            }
+            if (event.key === "Escape") {
+              event.stopPropagation();
+              event.preventDefault();
+              !noDismiss && dialogStore.closeDialog();
+            }
+          };
+          dialog.current.addEventListener("close", handleCloseTrigger);
+          dialog.current.addEventListener("keydown", keybordHandler);
+          return () => {
+            dialog.current?.removeEventListener("close", handleCloseTrigger);
+            dialog.current?.removeEventListener("keydown", keybordHandler);
+          };
+        } else {
+          dialog.current.close();
+        }
       }
-    }, [state.isOpen]);
+    }, [isOpen]);
 
-    return !state.isOpen ? null : (
+    return !isOpen ? null : (
       <dialog id={dialogId} ref={dialog} className={className}>
         {children}
       </dialog>
@@ -88,7 +120,7 @@ function createDialogStore(forceOpen: boolean = false) {
       };
     },
 
-    getDialogProps() {
+    getDialogState() {
       return state;
     },
   };
