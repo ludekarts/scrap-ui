@@ -15,16 +15,16 @@ interface CreateDialogOptions {
 
 type Resolver = (data?: any) => void;
 type ShowProps = Record<string, any> | undefined;
-type DialogInternalState = { isOpen: boolean } & ShowProps;
-type CreateDialogController<R = any> = {
-  show: (props?: ShowProps) => Promise<R>;
+type CreateDialogController<R = any, P = ShowProps> = {
+  show: (props?: P) => Promise<R>;
   close: (data?: R | React.FormEvent<HTMLFormElement>) => void;
-  getState: () => DialogInternalState;
+  // This is Hook so use it like one.
+  useDialogState: () => { isOpen: boolean } & P;
 };
 
-export function createDialog<R>(
+export function createDialog<R, P extends ShowProps = {}>(
   options: CreateDialogOptions = {}
-): [React.FC<DialogProps>, CreateDialogController<R>] {
+): [React.FC<DialogProps>, CreateDialogController<R, P>] {
   const {
     name,
     formParser,
@@ -33,7 +33,7 @@ export function createDialog<R>(
     outDelay = animate ? 300 : 0,
   } = options;
   const dialogId = getDialogId(name);
-  const dialogStore = createDialogStore<R>(forceOpen, outDelay);
+  const dialogStore = createDialogStore<R, P>(forceOpen, outDelay);
 
   const Dialog = (props: DialogProps) => {
     const { children, noDismiss, className } = props;
@@ -134,24 +134,29 @@ export function createDialog<R>(
 
     close(data?: R | React.FormEvent<HTMLFormElement>) {
       // Handle close by form submission.
-
       if (data) {
-        if (data instanceof Event && data.type === "submit") {
-          data.preventDefault();
+        if ((data as React.FormEvent).type === "submit") {
+          (data as React.FormEvent).preventDefault();
           dialogStore.closeDialog(
-            getFormFields(data.target as HTMLFormElement, formParser || {}) as R
+            getFormFields(
+              (data as React.FormEvent).target as HTMLFormElement,
+              formParser || {}
+            ) as R
           );
           return;
-        } else {
-          // If data is not an event, assume it's a custom data to return.
+        }
+        // Not an event, assume it's a custom data to return.
+        else {
           dialogStore.closeDialog(data as R);
         }
-      } else {
+      }
+      // No data.
+      else {
         dialogStore.closeDialog();
       }
     },
 
-    getState: useDialogState,
+    useDialogState: useDialogState,
   };
 
   return [Dialog, dialogController];
@@ -159,10 +164,10 @@ export function createDialog<R>(
 
 // ---- Helpers ----------------
 
-function createDialogStore<R>(forceOpen: boolean, outDelay: number) {
+function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
   let listener: (() => void) | undefined;
   let resolver: Resolver | undefined;
-  let state: DialogInternalState = { isOpen: forceOpen };
+  let state = { isOpen: forceOpen } as { isOpen: boolean } & P;
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
   let timer: number | null = null;

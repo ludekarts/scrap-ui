@@ -3,13 +3,26 @@ import "./styles/playground.css";
 import { useState } from "react";
 import { createDialog } from "@ludekarts/scrap-ui";
 
-interface DialogData {
+interface DialogReturnData {
   name?: string;
   toggle?: string;
 }
 
-const [MainDialog, ctrl] = createDialog<DialogData>({ animate: true });
-const [SubDialog, subCtrl] = createDialog({ outDelay: 500 });
+interface DialogProps {
+  icon: string;
+}
+
+interface SubDialogProps {
+  parentIcon: string;
+}
+
+const [MainDialog, ctrl] = createDialog<DialogReturnData, DialogProps>({
+  animate: true,
+});
+
+const [SubDialog, subCtrl] = createDialog<undefined, SubDialogProps>({
+  outDelay: 500,
+});
 
 export default function Playground() {
   let icon = "🏖️";
@@ -39,13 +52,10 @@ export default function Playground() {
 
 function MainDialogComponent() {
   const [expended, setExpanded] = useState(false);
-  // const { icon = "🌋" } = ctrl.getState();
-  const state = ctrl.getState();
-
-  const icon = (state.icon as string) || "🌋";
+  const { icon = "🌋" } = ctrl.useDialogState();
 
   const openSubdialog = async () => {
-    subCtrl.show();
+    subCtrl.show({ parentIcon: icon });
   };
 
   return (
@@ -78,6 +88,8 @@ function MainDialogComponent() {
 }
 
 function SubDialogComponent() {
+  const { parentIcon } = subCtrl.useDialogState();
+
   return (
     <SubDialog noDismiss className="animated">
       <div className="rail spread">
@@ -86,7 +98,9 @@ function SubDialogComponent() {
           ✖️
         </button>
       </div>
-      <p>This is a SubDialog component.</p>
+      <p>
+        This is a SubDialog component, and this is my parent icon: {parentIcon}
+      </p>
     </SubDialog>
   );
 }
