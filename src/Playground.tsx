@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createDialog } from "@ludekarts/scrap-ui";
 
 const [MainDialog, ctrl] = createDialog({ animate: true });
-const [SubDialog, subCtrl] = createDialog({ inDelay: 100, outDelay: 500 });
+const [SubDialog, subCtrl] = createDialog({ outDelay: 500 });
 
 export default function Playground() {
   let icon = "🏖️";

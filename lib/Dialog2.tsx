@@ -7,9 +7,8 @@ interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
 
 interface CreateDialogOptions {
   name?: string;
-  inDelay?: number;
-  outDelay?: number;
   animate?: boolean;
+  outDelay?: number;
   forceOpen?: boolean;
   formParser?: Record<string, any>;
 }
@@ -22,7 +21,6 @@ export function createDialog(
     formParser,
     animate = false,
     forceOpen = false,
-    inDelay = animate ? 100 : 0,
     outDelay = animate ? 300 : 0,
   } = options;
   const dialogId = getDialogId(name);
@@ -47,17 +45,19 @@ export function createDialog(
         if (isOpen) {
           dialog.current.showModal();
 
-          // Set open transition.
+          // Set open transition state.
           setTimeout(() => {
             if (dialog.current) {
               dialog.current.dataset.transition = "open-to-close";
             }
-          }, inDelay);
+          }, 10);
 
           const [head, tail] = getHeadAndTail(
             getFocusableNodes(dialog.current)
           );
+
           const keybordHandler = (event: KeyboardEvent) => {
+            // Handle Tab key focus navigation.
             if (event.key === "Tab") {
               if (event.shiftKey) {
                 if (document.activeElement === head) {
@@ -71,12 +71,15 @@ export function createDialog(
                 }
               }
             }
+
+            // Handle Escape key exit (custom).
             if (event.key === "Escape") {
               event.stopPropagation();
               event.preventDefault();
               !noDismiss && dialogStore.closeDialog();
             }
           };
+
           dialog.current.addEventListener("close", handleCloseTrigger);
           dialog.current.addEventListener("keydown", keybordHandler);
           return () => {
@@ -121,7 +124,7 @@ export function createDialog(
     },
 
     close(data?: any) {
-      // Handle clode by form submission.
+      // Handle close by form submission.
       if (data?.type === "submit") {
         data.preventDefault();
         dialogStore.closeDialog(
@@ -146,6 +149,7 @@ function createDialogStore(forceOpen: boolean, outDelay: number) {
   let state = { isOpen: forceOpen };
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
+  let timer: number | null = null;
   return {
     showDialog(resolve: any, props: Record<string, any> = {}) {
       lastActiveElement = document.activeElement as HTMLElement;
@@ -161,7 +165,7 @@ function createDialogStore(forceOpen: boolean, outDelay: number) {
       }
       resolver?.(data);
       resolver = undefined;
-      setTimeout(() => {
+      timer = setTimeout(() => {
         listener?.();
         // Restore focus to the last active element after dialog is closed.
         setTimeout(() => {
@@ -177,7 +181,11 @@ function createDialogStore(forceOpen: boolean, outDelay: number) {
     subscribe(cb: () => void) {
       listener = cb;
       return () => {
+        dialogRef = null;
         listener = undefined;
+        resolver = undefined;
+        lastActiveElement = null;
+        timer && clearTimeout(timer);
       };
     },
 
