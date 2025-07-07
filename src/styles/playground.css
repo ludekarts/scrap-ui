@@ -82,3 +82,25 @@ dialog {
     border: none;
   }
 }
+
+/* Dialog */
+
+dialog.animated[data-transition="init"] {
+  scale: 0.7 0.7;
+  rotate: -120deg;
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+dialog.animated[data-transition="close-to-open"] {
+  scale: 0.7 0.7;
+  rotate: 120deg;
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+dialog.animated[data-transition="open-to-close"] {
+  scale: 1 1;
+  rotate: 0deg;
+  opacity: 1;
+  transition: all 0.5s ease;
+}

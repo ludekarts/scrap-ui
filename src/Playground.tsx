@@ -3,8 +3,8 @@ import "./styles/playground.css";
 import { useState } from "react";
 import { createDialog } from "@ludekarts/scrap-ui";
 
-const [MainDialog, ctrl] = createDialog({ forceOpen: false });
-const [SubDialog, subCtrl] = createDialog({ forceOpen: false });
+const [MainDialog, ctrl] = createDialog({ animate: true });
+const [SubDialog, subCtrl] = createDialog({ inDelay: 100, outDelay: 500 });
 
 export default function Playground() {
   let icon = "🏖️";
@@ -61,8 +61,8 @@ function MainDialogComponent() {
         <button type="submit">Submit</button>
       </form>
       <div className="rail">
-        <button onClick={() => ctrl.close()}>Close</button>
         <button onClick={openSubdialog}>Subdialog</button>
+        <button onClick={() => ctrl.close()}>Close</button>
       </div>
       <SubDialogComponent />
     </MainDialog>
@@ -71,7 +71,7 @@ function MainDialogComponent() {
 
 function SubDialogComponent() {
   return (
-    <SubDialog noDismiss>
+    <SubDialog noDismiss className="animated">
       <div className="rail spread">
         <h2>🐋 Sub Dialog</h2>
         <button className="ghost" onClick={() => subCtrl.close()}>
