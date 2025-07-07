@@ -13,9 +13,16 @@ interface CreateDialogOptions {
   formParser?: Record<string, any>;
 }
 
-export function createDialog(
+type ShowProps = Record<string, any> | undefined;
+type CreateDialogController<T = any> = {
+  show: (props?: ShowProps) => Promise<T>;
+  close: (data?: T | React.FormEvent<HTMLFormElement>) => void;
+  getState: () => { isOpen: boolean } & Record<string, T>;
+};
+
+export function createDialog<T>(
   options: CreateDialogOptions = {}
-): [React.FC<DialogProps>, any] {
+): [React.FC<DialogProps>, CreateDialogController<T>] {
   const {
     name,
     formParser,
@@ -24,7 +31,7 @@ export function createDialog(
     outDelay = animate ? 300 : 0,
   } = options;
   const dialogId = getDialogId(name);
-  const dialogStore = createDialogStore(forceOpen, outDelay);
+  const dialogStore = createDialogStore<T>(forceOpen, outDelay);
 
   const Dialog = (props: DialogProps) => {
     const { children, noDismiss, className } = props;
@@ -117,21 +124,28 @@ export function createDialog(
   // Dialog Controller API.
 
   const dialogController = {
-    async show(props: Record<string, any> = {}) {
+    async show(props?: ShowProps) {
       return new Promise((resolve) => {
         dialogStore.showDialog(resolve, props);
       });
     },
 
-    close(data?: any) {
+    close(data?: T | React.FormEvent<HTMLFormElement>) {
       // Handle close by form submission.
-      if (data?.type === "submit") {
-        data.preventDefault();
-        dialogStore.closeDialog(
-          getFormFields(data.target as HTMLFormElement, formParser || {})
-        );
+
+      if (data) {
+        if (data instanceof Event && data.type === "submit") {
+          data.preventDefault();
+          dialogStore.closeDialog(
+            getFormFields(data.target as HTMLFormElement, formParser || {}) as T
+          );
+          return;
+        } else {
+          // If data is not an event, assume it's a custom data to return.
+          dialogStore.closeDialog(data as T);
+        }
       } else {
-        dialogStore.closeDialog(data);
+        dialogStore.closeDialog();
       }
     },
 
@@ -143,22 +157,24 @@ export function createDialog(
 
 // ---- Helpers ----------------
 
-function createDialogStore(forceOpen: boolean, outDelay: number) {
+type Resolver = (value: any) => void;
+
+function createDialogStore<T>(forceOpen: boolean, outDelay: number) {
   let listener: (() => void) | undefined;
-  let resolver: ((value: any) => void) | undefined;
+  let resolver: Resolver | undefined;
   let state = { isOpen: forceOpen };
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
   let timer: number | null = null;
   return {
-    showDialog(resolve: any, props: Record<string, any> = {}) {
+    showDialog(resolve: Resolver, props: ShowProps = {}) {
       lastActiveElement = document.activeElement as HTMLElement;
       state = { ...state, ...props, isOpen: true };
       resolver = resolve;
       listener?.();
     },
 
-    closeDialog(data?: any) {
+    closeDialog(data?: T) {
       state = { ...state, isOpen: false };
       if (dialogRef) {
         dialogRef.dataset.transition = "close-to-open";

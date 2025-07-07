@@ -3,7 +3,12 @@ import "./styles/playground.css";
 import { useState } from "react";
 import { createDialog } from "@ludekarts/scrap-ui";
 
-const [MainDialog, ctrl] = createDialog({ animate: true });
+interface DialogData {
+  name?: string;
+  toggle?: string;
+}
+
+const [MainDialog, ctrl] = createDialog<DialogData>({ animate: true });
 const [SubDialog, subCtrl] = createDialog({ outDelay: 500 });
 
 export default function Playground() {
@@ -34,7 +39,10 @@ export default function Playground() {
 
 function MainDialogComponent() {
   const [expended, setExpanded] = useState(false);
-  const { icon = "🌋" } = ctrl.getState();
+  // const { icon = "🌋" } = ctrl.getState();
+  const state = ctrl.getState();
+
+  const icon = (state.icon as string) || "🌋";
 
   const openSubdialog = async () => {
     subCtrl.show();
