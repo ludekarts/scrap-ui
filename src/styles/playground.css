@@ -3,9 +3,19 @@ body {
   height: 100%;
 }
 
+main {
+  gap: 1em;
+  display: flex;
+  flex-direction: column;
+}
+
 * {
   padding: 0;
   margin: 0;
+}
+
+hr {
+  border-color: #ddd;
 }
 
 .stack {
@@ -83,7 +93,7 @@ dialog {
   }
 }
 
-/* Dialog */
+/* Dialog custom animations */
 
 dialog.animated[data-transition="init"] {
   scale: 0.7 0.7;
@@ -103,4 +113,37 @@ dialog.animated[data-transition="open-to-close"] {
   rotate: 0deg;
   opacity: 1;
   transition: all 0.5s ease;
+}
+
+/* Combobox */
+
+.combobox-wrapper {
+  width: 200px;
+  & .combobox {
+    width: 100%;
+    border-radius: 2em;
+    padding: 0.3em 0.5em;
+    border: 2px solid black;
+
+    & + ul {
+      margin-top: -1px;
+      border-radius: 1em;
+      padding: 0.3em 0.5em;
+      border: 2px solid black;
+
+      & > li {
+        gap: 0.5em;
+        display: flex;
+        border-radius: 2em;
+        padding: 0.1em 0.3em;
+        &[aria-selected="true"] {
+          background-color: skyblue;
+        }
+      }
+
+      &:empty {
+        display: none;
+      }
+    }
+  }
 }

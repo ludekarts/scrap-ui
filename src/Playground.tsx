@@ -1,7 +1,7 @@
 import "./styles/preflight.css";
 import "./styles/playground.css";
 import { useState } from "react";
-import { createDialog } from "@ludekarts/scrap-ui";
+import { Combobox, createDialog } from "@ludekarts/scrap-ui";
 
 interface DialogReturnData {
   name?: string;
@@ -24,6 +24,17 @@ const [SubDialog, subCtrl] = createDialog<undefined, SubDialogProps>({
   outDelay: 500,
 });
 
+const fruits = [
+  { id: "1", name: "Apple", icon: "🍎" },
+  { id: "2", name: "Banana", icon: "🍌" },
+  { id: "3", name: "Cherry", icon: "🍒" },
+  { id: "4", name: "Coconut", icon: "🥥" },
+  { id: "5", name: "Watermelon", icon: "🍉" },
+  { id: "6", name: "Orange", icon: "🍊" },
+  { id: "7", name: "Grape", icon: "🍇" },
+  { id: "8", name: "Strawberry", icon: "🍓" },
+];
+
 export default function Playground() {
   let icon = "🏖️";
 
@@ -33,7 +44,7 @@ export default function Playground() {
   };
 
   return (
-    <div>
+    <main>
       <h1>Hello Playground!</h1>
       <div className="rail">
         <button onClick={showBaseDialog}>SHOW DIALOG</button>
@@ -45,8 +56,12 @@ export default function Playground() {
           Change Label
         </button>
       </div>
+      <hr />
+
+      <FruitSearch />
+
       <MainDialogComponent />
-    </div>
+    </main>
   );
 }
 
@@ -102,5 +117,32 @@ function SubDialogComponent() {
         This is a SubDialog component, and this is my parent icon: {parentIcon}
       </p>
     </SubDialog>
+  );
+}
+
+function FruitSearch() {
+  const [phrases, setPhrases] = useState<string>("");
+  const [selected, setSelected] = useState<string>("");
+  const displayFruits = fruits.filter((f) =>
+    f.name.toLocaleLowerCase().includes(phrases)
+  );
+  return (
+    <div className="combobox-wrapper">
+      <Combobox
+        name="fruits"
+        className="combobox"
+        placeholder="🔍 Search for a fruit"
+        selectedItem={selected}
+        onChange={(value) => setPhrases(value.toLocaleLowerCase())}
+        onSelect={(value) => setSelected(displayFruits[value].name)}
+      >
+        {displayFruits.map((fruit) => (
+          <li key={fruit.id}>
+            <span>{fruit.icon}</span>
+            <span>{fruit.name}</span>
+          </li>
+        ))}
+      </Combobox>
+    </div>
   );
 }
