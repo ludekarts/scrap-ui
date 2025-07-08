@@ -117,32 +117,47 @@ dialog.animated[data-transition="open-to-close"] {
 
 /* Combobox */
 
-.combobox-wrapper {
+.combobox {
   width: 200px;
-  & .combobox {
+  padding: 0.2em;
+  border-radius: 1.2em;
+  background-color: #06ebb1;
+  border: 2px dashed black;
+
+  & .combobox-input {
     width: 100%;
+    outline: none;
     border-radius: 2em;
     padding: 0.3em 0.5em;
+    background-color: white;
+    border: 2px solid black;
+  }
+
+  & .combobox-list {
+    margin-top: 2px;
+    cursor: pointer;
+    border-radius: 1em;
+    padding: 0.3em 0.5em;
+    background-color: white;
     border: 2px solid black;
 
-    & + ul {
-      margin-top: -1px;
-      border-radius: 1em;
-      padding: 0.3em 0.5em;
-      border: 2px solid black;
+    &:empty {
+      display: none;
+    }
 
-      & > li {
-        gap: 0.5em;
-        display: flex;
-        border-radius: 2em;
-        padding: 0.1em 0.3em;
-        &[aria-selected="true"] {
-          background-color: skyblue;
-        }
+    & > li {
+      gap: 0.5em;
+      display: flex;
+      border-radius: 2em;
+      padding: 0.1em 0.3em;
+      transition: background-color 0.3s ease;
+
+      &[aria-selected="true"] {
+        background-color: skyblue;
       }
 
-      &:empty {
-        display: none;
+      &:hover {
+        background-color: #ddd;
       }
     }
   }

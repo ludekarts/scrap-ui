@@ -1,7 +1,12 @@
 import "./styles/preflight.css";
 import "./styles/playground.css";
 import { useState } from "react";
-import { Combobox, createDialog } from "@ludekarts/scrap-ui";
+import {
+  Combobox2,
+  ComboboxInput,
+  ComboboxList,
+  createDialog,
+} from "@ludekarts/scrap-ui";
 
 interface DialogReturnData {
   name?: string;
@@ -45,7 +50,7 @@ export default function Playground() {
 
   return (
     <main>
-      <h1>Hello Playground!</h1>
+      <h1>Dialog</h1>
       <div className="rail">
         <button onClick={showBaseDialog}>SHOW DIALOG</button>
         <button
@@ -58,7 +63,9 @@ export default function Playground() {
       </div>
       <hr />
 
+      <h1>Combobox</h1>
       <FruitSearch />
+      <hr />
 
       <MainDialogComponent />
     </main>
@@ -127,13 +134,14 @@ function FruitSearch() {
     f.name.toLocaleLowerCase().includes(phrases)
   );
   return (
-    <div className="combobox-wrapper">
-      <Combobox
-        name="fruits"
-        className="combobox"
+    <Combobox2 name="fruits" className="combobox">
+      <ComboboxInput
+        className="combobox-input"
         placeholder="🔍 Search for a fruit"
-        selectedItem={selected}
         onChange={(value) => setPhrases(value.toLocaleLowerCase())}
+      />
+      <ComboboxList
+        className="combobox-list"
         onSelect={(value) => setSelected(displayFruits[value].name)}
       >
         {displayFruits.map((fruit) => (
@@ -142,7 +150,34 @@ function FruitSearch() {
             <span>{fruit.name}</span>
           </li>
         ))}
-      </Combobox>
-    </div>
+      </ComboboxList>
+    </Combobox2>
   );
 }
+
+// function FruitSearch() {
+//   const [phrases, setPhrases] = useState<string>("");
+//   const [selected, setSelected] = useState<string>("");
+//   const displayFruits = fruits.filter((f) =>
+//     f.name.toLocaleLowerCase().includes(phrases)
+//   );
+//   return (
+//     <div className="combobox-wrapper">
+//       <Combobox
+//         name="fruits"
+//         className="combobox"
+//         placeholder="🔍 Search for a fruit"
+//         selectedItem={selected}
+//         onChange={(value) => setPhrases(value.toLocaleLowerCase())}
+//         onSelect={(value) => setSelected(displayFruits[value].name)}
+//       >
+//         {displayFruits.map((fruit) => (
+//           <li key={fruit.id}>
+//             <span>{fruit.icon}</span>
+//             <span>{fruit.name}</span>
+//           </li>
+//         ))}
+//       </Combobox>
+//     </div>
+//   );
+// }
