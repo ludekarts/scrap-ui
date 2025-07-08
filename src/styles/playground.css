@@ -118,16 +118,34 @@ dialog.animated[data-transition="open-to-close"] {
 /* Combobox */
 
 .combobox {
-  width: 200px;
+  width: 260px;
   padding: 0.2em;
-  border-radius: 1.2em;
+  border-radius: 1.4em;
   background-color: #06ebb1;
   border: 2px dashed black;
+
+  & .combobox-rail {
+    align-items: center;
+    display: flex;
+    gap: 0.1em;
+  }
 
   & .combobox-input {
     width: 100%;
     outline: none;
     border-radius: 2em;
+    padding: 0.3em 0.5em;
+    background-color: white;
+    border: 2px solid black;
+  }
+
+  & .combobox-selected {
+    width: 2.2em;
+    height: 2.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     padding: 0.3em 0.5em;
     background-color: white;
     border: 2px solid black;

@@ -2,7 +2,7 @@ import "./styles/preflight.css";
 import "./styles/playground.css";
 import { useState } from "react";
 import {
-  Combobox2,
+  Combobox,
   ComboboxInput,
   ComboboxList,
   createDialog,
@@ -29,7 +29,13 @@ const [SubDialog, subCtrl] = createDialog<undefined, SubDialogProps>({
   outDelay: 500,
 });
 
-const fruits = [
+type Fruit = {
+  id: string;
+  name: string;
+  icon: string;
+};
+
+const fruits: Fruit[] = [
   { id: "1", name: "Apple", icon: "🍎" },
   { id: "2", name: "Banana", icon: "🍌" },
   { id: "3", name: "Cherry", icon: "🍒" },
@@ -129,21 +135,25 @@ function SubDialogComponent() {
 
 function FruitSearch() {
   const [phrases, setPhrases] = useState<string>("");
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<Fruit | null>(null);
   const displayFruits = fruits.filter((f) =>
     f.name.toLocaleLowerCase().includes(phrases)
   );
   return (
-    <Combobox2 name="fruits" className="combobox">
-      <ComboboxInput
-        className="combobox-input"
-        placeholder="🔍 Search for a fruit"
-        onChange={(value) => setPhrases(value.toLocaleLowerCase())}
-      />
-      <ComboboxList
-        className="combobox-list"
-        onSelect={(value) => setSelected(displayFruits[value].name)}
-      >
+    <Combobox name="fruits" className="combobox">
+      <div className="combobox-rail">
+        <ComboboxInput
+          className="combobox-input"
+          placeholder="🔍 Search for a fruit"
+          onChange={(event) =>
+            setPhrases(event.target.value.toLocaleLowerCase())
+          }
+        />
+        <span className="combobox-selected">
+          {!selected ? "🌚" : selected.icon}
+        </span>
+      </div>
+      <ComboboxList className="combobox-list">
         {displayFruits.map((fruit) => (
           <li key={fruit.id}>
             <span>{fruit.icon}</span>
@@ -151,7 +161,7 @@ function FruitSearch() {
           </li>
         ))}
       </ComboboxList>
-    </Combobox2>
+    </Combobox>
   );
 }
 
