@@ -139,7 +139,7 @@ dialog.animated[data-transition="open-to-close"] {
     border: 2px solid black;
   }
 
-  & .combobox-selected {
+  & .combobox-icon {
     width: 2.2em;
     height: 2.2em;
     display: flex;
@@ -176,6 +176,10 @@ dialog.animated[data-transition="open-to-close"] {
 
       &:hover {
         background-color: #ddd;
+      }
+
+      & > * {
+        pointer-events: none;
       }
     }
   }

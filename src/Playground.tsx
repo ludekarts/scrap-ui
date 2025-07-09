@@ -35,7 +35,7 @@ type Fruit = {
   icon: string;
 };
 
-const fruits: Fruit[] = [
+const initFruits: Fruit[] = [
   { id: "1", name: "Apple", icon: "🍎" },
   { id: "2", name: "Banana", icon: "🍌" },
   { id: "3", name: "Cherry", icon: "🍒" },
@@ -134,13 +134,56 @@ function SubDialogComponent() {
 }
 
 function FruitSearch() {
+  const [fruits, setFruits] = useState<Fruit[]>(initFruits);
   const [phrases, setPhrases] = useState<string>("");
   const [selected, setSelected] = useState<Fruit | null>(null);
   const displayFruits = fruits.filter((f) =>
     f.name.toLocaleLowerCase().includes(phrases)
   );
+
+  const selectFruit = (index: number, isEmptyOption: boolean) => {
+    if (isEmptyOption) {
+      addFruit();
+    } else {
+      setPhrases("");
+      setSelected(displayFruits[index]);
+    }
+  };
+
+  const addFruit = () => {
+    const fruit = prompt("Enter new fruit: (Format: 🍍 Pineapple)");
+
+    if (!fruit) {
+      return;
+    }
+
+    const [icon, fruitName] = fruit.split(" ", 2);
+
+    if (!icon || !fruitName) {
+      alert("Invalid input. Please use the format: 🍍 Pineapple");
+      return;
+    }
+
+    const newFruit: Fruit = {
+      id: (fruits.length + 1).toString(),
+      name: fruitName.trim(),
+      icon: icon.trim(),
+    };
+
+    if (fruits.some((f) => f.name === newFruit.name)) {
+      alert("This fruit already exists.");
+      return;
+    }
+    setFruits((fruits) => [...fruits, newFruit]);
+  };
+
   return (
-    <Combobox name="fruits" className="combobox">
+    <Combobox
+      name="fruits"
+      className="combobox"
+      onOptionSelected={selectFruit}
+      selectedValue={selected?.name || ""}
+    >
       <div className="combobox-rail">
         <ComboboxInput
           className="combobox-input"
@@ -149,7 +192,7 @@ function FruitSearch() {
             setPhrases(event.target.value.toLocaleLowerCase())
           }
         />
-        <span className="combobox-selected">
+        <span className="combobox-icon">
           {!selected ? "🌚" : selected.icon}
         </span>
       </div>
@@ -160,6 +203,10 @@ function FruitSearch() {
             <span>{fruit.name}</span>
           </li>
         ))}
+        <li data-empty-option="true">
+          <span>➕</span>
+          <span>Add new fruit</span>
+        </li>
       </ComboboxList>
     </Combobox>
   );
