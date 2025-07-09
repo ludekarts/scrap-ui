@@ -135,23 +135,15 @@ function SubDialogComponent() {
 
 function FruitSearch() {
   const [fruits, setFruits] = useState<Fruit[]>(initFruits);
-  const [phrases, setPhrases] = useState<string>("");
+  const [phrase, setPhrase] = useState<string>("");
   const [selected, setSelected] = useState<Fruit | null>(null);
   const displayFruits = fruits.filter((f) =>
-    f.name.toLocaleLowerCase().includes(phrases)
+    f.name.toLocaleLowerCase().includes(phrase)
   );
 
-  const selectFruit = (index: number, isEmptyOption: boolean) => {
-    if (isEmptyOption) {
-      addFruit();
-    } else {
-      setPhrases("");
-      setSelected(displayFruits[index]);
-    }
-  };
-
-  const addFruit = () => {
-    const fruit = prompt("Enter new fruit: (Format: 🍍 Pineapple)");
+  const addFruit = (initFruit?: string) => {
+    const fruit =
+      initFruit || prompt("Enter new fruit: (Format: 🍍 Pineapple)");
 
     if (!fruit) {
       return;
@@ -174,67 +166,63 @@ function FruitSearch() {
       alert("This fruit already exists.");
       return;
     }
+
     setFruits((fruits) => [...fruits, newFruit]);
+
+    setSelected(newFruit);
+  };
+
+  const selectFruit = (index: number, isEmptyOption: boolean) => {
+    if (isEmptyOption) {
+      addFruit();
+    } else {
+      setPhrase("");
+      setSelected(displayFruits[index]);
+    }
+  };
+
+  const showFormData = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    console.log(Object.fromEntries(data));
   };
 
   return (
-    <Combobox
-      name="fruits"
-      className="combobox"
-      onOptionSelected={selectFruit}
-      selectedValue={selected?.name || ""}
-    >
-      <div className="combobox-rail">
-        <ComboboxInput
-          className="combobox-input"
-          placeholder="🔍 Search for a fruit"
-          onChange={(event) =>
-            setPhrases(event.target.value.toLocaleLowerCase())
-          }
-        />
-        <span className="combobox-icon">
-          {!selected ? "🌚" : selected.icon}
-        </span>
-      </div>
-      <ComboboxList className="combobox-list">
-        {displayFruits.map((fruit) => (
-          <li key={fruit.id}>
-            <span>{fruit.icon}</span>
-            <span>{fruit.name}</span>
+    <form onSubmit={showFormData}>
+      <Combobox
+        name="fruit"
+        className="combobox"
+        onOptionSelected={selectFruit}
+        selectedValue={selected?.name || ""}
+      >
+        <div className="combobox-rail">
+          <ComboboxInput
+            className="combobox-input"
+            placeholder="🔍 Search for a fruit"
+            onChange={(event) =>
+              setPhrase(event.target.value.toLocaleLowerCase())
+            }
+          />
+          <span className="combobox-icon">
+            {!selected ? "🌚" : selected.icon}
+          </span>
+        </div>
+        <ComboboxList className="combobox-list">
+          {displayFruits.map((fruit) => (
+            <li key={fruit.id}>
+              <span>{fruit.icon}</span>
+              <span>{fruit.name}</span>
+            </li>
+          ))}
+          <li data-empty-option="true">
+            <span>➕</span>
+            <span>Add new fruit</span>
           </li>
-        ))}
-        <li data-empty-option="true">
-          <span>➕</span>
-          <span>Add new fruit</span>
-        </li>
-      </ComboboxList>
-    </Combobox>
+        </ComboboxList>
+      </Combobox>
+      <div>
+        <button type="submit">Send form</button>
+      </div>
+    </form>
   );
 }
-
-// function FruitSearch() {
-//   const [phrases, setPhrases] = useState<string>("");
-//   const [selected, setSelected] = useState<string>("");
-//   const displayFruits = fruits.filter((f) =>
-//     f.name.toLocaleLowerCase().includes(phrases)
-//   );
-//   return (
-//     <div className="combobox-wrapper">
-//       <Combobox
-//         name="fruits"
-//         className="combobox"
-//         placeholder="🔍 Search for a fruit"
-//         selectedItem={selected}
-//         onChange={(value) => setPhrases(value.toLocaleLowerCase())}
-//         onSelect={(value) => setSelected(displayFruits[value].name)}
-//       >
-//         {displayFruits.map((fruit) => (
-//           <li key={fruit.id}>
-//             <span>{fruit.icon}</span>
-//             <span>{fruit.name}</span>
-//           </li>
-//         ))}
-//       </Combobox>
-//     </div>
-//   );
-// }
