@@ -10,26 +10,32 @@ import React, {
   useImperativeHandle,
 } from "react";
 
-const voidFn = () => {};
+interface ComboboxContextProps {
+  name: string;
+  isOpen: boolean;
+  selectedValue?: string;
+  childrenCount: number;
+  highlightedIndex: number;
+  listId: string;
+  labelId: string;
+  inputId: string;
+  toggleOpen: (open: boolean) => void;
+  selectOption: (index: number) => void;
+  setChildrenCount: (count: number) => void;
+  setHighlightedIndex: (index: number | ((prev: number) => number)) => void;
+}
 
-const initialComboboxContext = {
-  name: "",
-  listId: "",
-  labelId: "",
-  inputId: "",
-  isOpen: false,
-  childrenCount: 0,
-  selectedValue: "",
-  highlightedIndex: -1,
-  toggleOpen: voidFn,
-  selectOption: voidFn,
-  setInputValue: voidFn,
-  onOptionSelected: voidFn,
-  setChildrenCount: voidFn,
-  setHighlightedIndex: voidFn,
-};
+const ComboboxContext = createContext<ComboboxContextProps | undefined>(
+  undefined
+);
 
-const ComboboxContext = createContext(initialComboboxContext);
+function useComboboxContext() {
+  const context = React.useContext(ComboboxContext);
+  if (!context) {
+    throw new Error("useComboboxContext must be used within a Provider");
+  }
+  return context;
+}
 
 interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
@@ -127,7 +133,7 @@ export const ComboboxInput = React.forwardRef<
     toggleOpen,
     selectOption,
     setHighlightedIndex,
-  } = useContext(ComboboxContext);
+  } = useComboboxContext();
 
   const activeDescendant =
     isOpen && highlightedIndex >= 0
@@ -136,16 +142,21 @@ export const ComboboxInput = React.forwardRef<
 
   useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
 
-  function activateList(event) {
+  function activateList(
+    event:
+      | React.FocusEvent<HTMLInputElement>
+      | React.MouseEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLInputElement>
+  ) {
     childrenCount > 0 && !isOpen && toggleOpen(true);
 
     // Forwaerd events to parent handlers.
     if (event.type === "input" && onInput) {
-      onInput(event);
+      onInput(event as React.FormEvent<HTMLInputElement>);
     } else if (event.type === "focus" && onFocus) {
-      onFocus(event);
+      onFocus(event as React.FocusEvent<HTMLInputElement>);
     } else if (event.type === "click" && onClick) {
-      onClick(event);
+      onClick(event as React.MouseEvent<HTMLInputElement>);
     }
   }
 
@@ -163,7 +174,7 @@ export const ComboboxInput = React.forwardRef<
           toggleOpen(true);
           setHighlightedIndex(0);
         } else {
-          setHighlightedIndex((prev) => (prev + 1) % count);
+          setHighlightedIndex((prev: number) => (prev + 1) % count);
         }
         break;
       case "ArrowUp":
@@ -237,11 +248,10 @@ export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
     isOpen,
     listId,
     labelId,
-
     highlightedIndex,
     selectOption,
     setChildrenCount,
-  } = useContext(ComboboxContext);
+  } = useComboboxContext();
 
   function handleItemClick(event: React.MouseEvent<HTMLElement>) {
     const target = event.target as HTMLElement;
