@@ -26,7 +26,7 @@ export default function DialogExample() {
   let icon = "🏖️";
 
   const showBaseDialog = async () => {
-    const result = await ctrl.show({ icon });
+    const result = await ctrl.open({ icon });
     console.log("Dialog closed with:", result);
   };
 
@@ -50,7 +50,7 @@ function MainDialogComponent() {
   const { icon = "🌋" } = ctrl.useDialogState();
 
   const openSubdialog = async () => {
-    subCtrl.show({ parentIcon: icon });
+    subCtrl.open({ parentIcon: icon });
   };
 
   return (

@@ -14,15 +14,15 @@ interface CreateDialogOptions {
 }
 
 type Resolver = (data?: any) => void;
-type ShowProps = Record<string, any> | undefined;
-type CreateDialogController<R = any, P = ShowProps> = {
-  show: (props?: P) => Promise<R>;
+type OpenProps = Record<string, any> | undefined;
+type CreateDialogController<R = any, P = OpenProps> = {
+  open: (props?: P) => Promise<R>;
   close: (data?: R | React.FormEvent<HTMLFormElement>) => void;
   // This is a Hook, so use it like one.
   useDialogState: () => { isOpen: boolean } & P;
 };
 
-export function createDialog<R, P extends ShowProps = {}>(
+export function createDialog<R, P extends OpenProps = {}>(
   options: CreateDialogOptions = {}
 ): [React.FC<DialogProps>, CreateDialogController<R, P>] {
   const {
@@ -57,7 +57,7 @@ export function createDialog<R, P extends ShowProps = {}>(
           // Set open transition state.
           setTimeout(() => {
             if (dialog.current) {
-              dialog.current.dataset.transition = "open-to-close";
+              dialog.current.dataset.transition = "close-to-open";
             }
           }, 10);
 
@@ -126,15 +126,15 @@ export function createDialog<R, P extends ShowProps = {}>(
   // Dialog Controller API.
 
   const dialogController = {
-    async show(props?: ShowProps) {
+    async open(props?: OpenProps) {
       return new Promise<R>((resolve) => {
-        dialogStore.showDialog(resolve, props);
+        dialogStore.openDialog(resolve, props);
       });
     },
 
-    close(data?: R | React.FormEvent<HTMLFormElement>) {
-      // Handle close by form submission.
+    close(data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent) {
       if (data) {
+        // Handle close by form submission.
         if ((data as React.FormEvent).type === "submit") {
           (data as React.FormEvent).preventDefault();
           dialogStore.closeDialog(
@@ -144,6 +144,13 @@ export function createDialog<R, P extends ShowProps = {}>(
             ) as R
           );
           return;
+        }
+        // Handle close by mouse click.
+        else if (
+          data instanceof MouseEvent &&
+          (data as MouseEvent).type === "click"
+        ) {
+          dialogStore.closeDialog();
         }
         // Not an event, assume it's a custom data to return.
         else {
@@ -172,7 +179,7 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
   let lastActiveElement: HTMLElement | null = null;
   let timer: number | null = null;
   return {
-    showDialog(resolve: Resolver, props: ShowProps = {}) {
+    openDialog(resolve: Resolver, props: OpenProps = {}) {
       lastActiveElement = document.activeElement as HTMLElement;
       state = { ...state, ...props, isOpen: true };
       resolver = resolve;
@@ -182,7 +189,7 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
     closeDialog(data?: R) {
       state = { ...state, isOpen: false };
       if (dialogRef) {
-        dialogRef.dataset.transition = "close-to-open";
+        dialogRef.dataset.transition = "open-to-close";
       }
       resolver?.(data);
       resolver = undefined;
