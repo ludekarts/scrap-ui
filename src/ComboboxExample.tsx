@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Combobox, ComboboxInput, ComboboxList } from "@ludekarts/scrap-ui";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxList,
+  ComboboxItem,
+} from "@ludekarts/scrap-ui";
+
+import type { ComboboxSlection } from "@ludekarts/scrap-ui";
 
 type Fruit = {
   id: string;
@@ -25,16 +32,16 @@ export function BearboneComboboxExample() {
     f.name.toLocaleLowerCase().includes(phrase)
   );
 
-  const selectOption = (index: number) => {
-    setSelectedValue(displayFruits[index]?.name || "");
-  };
+  // const selectOption = (index: ComboboxSlection) => {
+  //   setSelectedValue(displayFruits[index]?.name || "");
+  // };
 
   return (
     <Combobox
       name="basic"
       className="bearbone-combobox"
       selectedValue={selectedValue}
-      onOptionSelected={selectOption}
+      // onOptionSelected={selectOption}
     >
       <ComboboxInput
         onChange={(event) => setPhrase(event.target.value.toLocaleLowerCase())}
@@ -52,9 +59,6 @@ export default function ComboboxExample() {
   const [fruits, setFruits] = useState<Fruit[]>(initFruits);
   const [phrase, setPhrase] = useState<string>("");
   const [selected, setSelected] = useState<Fruit | null>(null);
-  const displayFruits = fruits.filter((f) =>
-    f.name.toLocaleLowerCase().includes(phrase)
-  );
 
   const addFruit = (initFruit?: string) => {
     const fruit =
@@ -82,12 +86,16 @@ export default function ComboboxExample() {
     setSelected(newFruit);
   };
 
-  const selectFruit = (index: number, isEmptyOption: boolean) => {
+  const selectFruit = (value: ComboboxSlection, isEmptyOption: boolean) => {
     if (isEmptyOption) {
       addFruit();
     } else {
-      setPhrase("");
-      setSelected(displayFruits[index]);
+      const fruit = fruits.find((f) => f.id === value);
+      if (fruit) {
+        setSelected(fruit);
+      } else {
+        setSelected(null);
+      }
     }
   };
 
@@ -104,6 +112,7 @@ export default function ComboboxExample() {
         className="combobox"
         onOptionSelected={selectFruit}
         selectedValue={selected?.name || ""}
+        submitValue={!selected ? undefined : selected.id}
       >
         <div className="combobox-rail">
           <ComboboxInput
@@ -118,16 +127,18 @@ export default function ComboboxExample() {
           </span>
         </div>
         <ComboboxList className="combobox-list">
-          {displayFruits.map((fruit) => (
-            <li key={fruit.id}>
-              <span>{fruit.icon}</span>
-              <span>{fruit.name}</span>
-            </li>
-          ))}
-          <li data-empty-option="true">
+          {fruits
+            .filter((f) => f.name.toLocaleLowerCase().includes(phrase))
+            .map((fruit) => (
+              <ComboboxItem key={fruit.id} value={fruit.id}>
+                <span>{fruit.icon}</span>
+                <span>{fruit.name}</span>
+              </ComboboxItem>
+            ))}
+          <ComboboxItem empty>
             <span>➕</span>
             <span>Add new fruit</span>
-          </li>
+          </ComboboxItem>
         </ComboboxList>
       </Combobox>
       <div>
