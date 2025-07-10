@@ -115,7 +115,16 @@ dialog.animated[data-transition="close-to-open"] {
   transition: all 0.5s ease;
 }
 
-/* Combobox */
+/* COMBOBOX */
+
+.bearbone-combobox {
+  & input[type="text"] {
+    border: 1px solid black;
+  }
+  & [aria-selected="true"] {
+    background-color: skyblue;
+  }
+}
 
 .combobox {
   width: 260px;

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useSyncExternalStore } from "react";
 import { getFormFields } from "@ludekarts/utility-belt";
+import type { FormFieldsOptions } from "@ludekarts/utility-belt";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
   noDismiss?: boolean;
@@ -10,7 +11,7 @@ interface CreateDialogOptions {
   animate?: boolean;
   outDelay?: number;
   forceOpen?: boolean;
-  formParser?: Record<string, any>;
+  formParser?: FormFieldsOptions;
 }
 
 type Resolver = (data?: any) => void;

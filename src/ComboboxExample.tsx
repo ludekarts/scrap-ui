@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { Combobox, ComboboxInput, ComboboxList } from "@ludekarts/scrap-ui";
 
 type Fruit = {
@@ -18,6 +17,36 @@ const initFruits: Fruit[] = [
   { id: "7", name: "Grape", icon: "🍇" },
   { id: "8", name: "Strawberry", icon: "🍓" },
 ];
+
+export function BearboneComboboxExample() {
+  const [phrase, setPhrase] = useState<string>("");
+  const [selectedValue, setSelectedValue] = useState<string>("");
+  const displayFruits = initFruits.filter((f) =>
+    f.name.toLocaleLowerCase().includes(phrase)
+  );
+
+  const selectOption = (index: number) => {
+    setSelectedValue(displayFruits[index]?.name || "");
+  };
+
+  return (
+    <Combobox
+      name="basic"
+      className="bearbone-combobox"
+      selectedValue={selectedValue}
+      onOptionSelected={selectOption}
+    >
+      <ComboboxInput
+        onChange={(event) => setPhrase(event.target.value.toLocaleLowerCase())}
+      />
+      <ComboboxList>
+        {displayFruits.map((fruit) => (
+          <li key={fruit.id}>{fruit.name}</li>
+        ))}
+      </ComboboxList>
+    </Combobox>
+  );
+}
 
 export default function ComboboxExample() {
   const [fruits, setFruits] = useState<Fruit[]>(initFruits);
