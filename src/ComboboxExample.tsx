@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
   Combobox,
-  ComboboxInput,
   ComboboxList,
   ComboboxItem,
+  ComboboxInput,
 } from "@ludekarts/scrap-ui";
 
 import type { ComboboxSlection } from "@ludekarts/scrap-ui";
@@ -26,32 +26,42 @@ const initFruits: Fruit[] = [
 ];
 
 export function BearboneComboboxExample() {
+  const [fruits] = useState<string[]>(initFruits.map((f) => f.name));
   const [phrase, setPhrase] = useState<string>("");
-  const [selectedValue, setSelectedValue] = useState<string>("");
-  const displayFruits = initFruits.filter((f) =>
-    f.name.toLocaleLowerCase().includes(phrase)
-  );
+  const [selectedValue, setSelectedValue] = useState<string>();
 
-  // const selectOption = (index: ComboboxSlection) => {
-  //   setSelectedValue(displayFruits[index]?.name || "");
-  // };
+  const selectOption = (value: ComboboxSlection) => {
+    setSelectedValue(fruits.find((f) => f === value));
+  };
 
   return (
-    <Combobox
-      name="basic"
-      className="bearbone-combobox"
-      selectedValue={selectedValue}
-      // onOptionSelected={selectOption}
-    >
-      <ComboboxInput
-        onChange={(event) => setPhrase(event.target.value.toLocaleLowerCase())}
-      />
-      <ComboboxList>
-        {displayFruits.map((fruit) => (
-          <li key={fruit.id}>{fruit.name}</li>
-        ))}
-      </ComboboxList>
-    </Combobox>
+    <div>
+      <label id="basic-label" htmlFor="basic-input">
+        Fruits
+      </label>
+      <Combobox
+        name="basic"
+        label="basic-Label"
+        className="bearbone-combobox"
+        selectedValue={selectedValue}
+        onOptionSelected={selectOption}
+      >
+        <ComboboxInput
+          onChange={(event) =>
+            setPhrase(event.target.value.toLocaleLowerCase())
+          }
+        />
+        <ComboboxList>
+          {fruits
+            .filter((f) => f.toLocaleLowerCase().includes(phrase))
+            .map((fruit) => (
+              <ComboboxItem key={fruit} value={fruit}>
+                {fruit}
+              </ComboboxItem>
+            ))}
+        </ComboboxList>
+      </Combobox>
+    </div>
   );
 }
 

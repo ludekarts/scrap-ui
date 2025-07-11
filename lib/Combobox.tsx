@@ -13,9 +13,10 @@ import React, {
 interface ComboboxContextProps {
   name: string;
   listId: string;
+  label?: string;
   isOpen: boolean;
-  labelId: string;
   inputId: string;
+  labelId?: string;
   submitValue?: string;
   childrenCount: number;
   selectedValue?: string;
@@ -40,6 +41,8 @@ function useComboboxContext() {
 
 export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
+  // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
+  label?: string;
   submitValue?: string;
   selectedValue?: string;
   children?: React.ReactNode;
@@ -55,9 +58,10 @@ export type ComboboxSlection = string | number | null;
 export function Combobox(props: ComboboxProps) {
   const {
     name,
+    label,
     children,
-    selectedValue,
     submitValue,
+    selectedValue = "",
     onOptionSelected,
     ...rest
   } = props;
@@ -76,12 +80,12 @@ export function Combobox(props: ComboboxProps) {
       childrenCount,
       highlightedIndex,
       listId: `${name}-list`,
-      labelId: `${name}-label`,
       inputId: `${name}-input`,
       toggleOpen,
       selectOption,
       setChildrenCount,
       setHighlightedIndex,
+      ...getLabels(label),
     }),
     [
       name,
@@ -130,15 +134,7 @@ export function Combobox(props: ComboboxProps) {
 
   return (
     <ComboboxContext.Provider value={combobox}>
-      <div
-        {...rest}
-        role="combobox"
-        ref={containerRef}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        aria-owns={combobox.listId}
-        aria-labelledby={combobox.labelId}
-      >
+      <div {...rest} ref={containerRef}>
         {children}
         {submitValue === undefined ? null : (
           <input
@@ -162,9 +158,11 @@ export const ComboboxInput = React.forwardRef<
 
   const {
     name,
+    label,
     isOpen,
     listId,
     inputId,
+    labelId,
     submitValue,
     selectedValue,
     childrenCount,
@@ -298,9 +296,15 @@ export const ComboboxInput = React.forwardRef<
       id={inputId}
       ref={inputRef}
       name={inputName}
+      role="combobox"
       autoComplete="off"
+      aria-owns={listId}
+      aria-label={label}
+      aria-expanded={isOpen}
       aria-controls={listId}
+      aria-haspopup="listbox"
       aria-autocomplete="list"
+      aria-labelledby={labelId}
       aria-activedescendant={activeDescendant}
       onKeyUp={handleKeyUp}
       onInput={activateList}
@@ -318,7 +322,6 @@ export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
     name,
     isOpen,
     listId,
-    labelId,
     highlightedIndex,
     selectOption,
     setChildrenCount,
@@ -351,7 +354,6 @@ export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
       id={listId}
       role="listbox"
       ref={listboxRef}
-      aria-labelledby={labelId}
       onClick={handleItemClick}
     >
       {Children.map(children, (child, index) =>
@@ -390,13 +392,6 @@ export function ComboboxItem(props: ComboboxItemProps) {
   );
 }
 
-export function ComboboxLabel(
-  props: React.LabelHTMLAttributes<HTMLLabelElement>
-) {
-  const { labelId } = useComboboxContext();
-  return <label {...props} id={labelId} />;
-}
-
 // ---- Helpers ----------------
 
 function getSelectedValue(
@@ -416,4 +411,13 @@ function isItemValue(value: any): boolean {
   return (
     value === value || typeof value === "string" || typeof value === "number"
   );
+}
+
+function getLabels(label?: string) {
+  if (!label) return {};
+  if (label.startsWith("#")) {
+    return { labelId: label.slice(1) };
+  } else {
+    return { label };
+  }
 }

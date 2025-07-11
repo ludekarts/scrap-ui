@@ -18,14 +18,16 @@ type Resolver = (data?: any) => void;
 type OpenProps = Record<string, any> | undefined;
 type CreateDialogController<R = any, P = OpenProps> = {
   open: (props?: P) => Promise<R>;
-  close: (data?: R | React.FormEvent<HTMLFormElement>) => void;
+  close: (
+    data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent
+  ) => void;
   // This is a Hook, so use it like one.
   useDialogState: () => { isOpen: boolean } & P;
 };
 
 export function createDialog<R, P extends OpenProps = {}>(
   options: CreateDialogOptions = {}
-): [React.FC<DialogProps>, CreateDialogController<R, P>] {
+): [React.FC<DialogProps>, CreateDialogController<R | undefined, P>] {
   const {
     name,
     formParser,
@@ -128,7 +130,7 @@ export function createDialog<R, P extends OpenProps = {}>(
 
   const dialogController = {
     async open(props?: OpenProps) {
-      return new Promise<R>((resolve) => {
+      return new Promise<R | undefined>((resolve) => {
         dialogStore.openDialog(resolve, props);
       });
     },
@@ -147,10 +149,7 @@ export function createDialog<R, P extends OpenProps = {}>(
           return;
         }
         // Handle close by mouse click.
-        else if (
-          data instanceof MouseEvent &&
-          (data as MouseEvent).type === "click"
-        ) {
+        else if ((data as React.MouseEvent).type === "click") {
           dialogStore.closeDialog();
         }
         // Not an event, assume it's a custom data to return.
