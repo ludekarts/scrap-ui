@@ -17,14 +17,18 @@
     },
     "./styles.css": "./dist/scrap-ui.css"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludekarts/scrap-ui.git"
+  },
+  "homepage": "https://github.com/ludekarts/latte#readme",
   "sideEffects": false,
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prebuild": "rimraf dist",
-    "publish": "pnpm build && npm publish --access public"
+    "prebuild": "rimraf dist"
   },
   "dependencies": {
     "@ludekarts/utility-belt": "^0.8.1",

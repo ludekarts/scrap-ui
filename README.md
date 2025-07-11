@@ -1,9 +1,8 @@
 # Scrap UI
 
-<div align="center">
-  <img src="./assets/scarp_ui_logo.svg" alt="Scrap UI Logo" width="150"/>
-  <p>A collection of various React UI components.</p>
-</div>
+![Scrap UI Logo](./assets/scarp_ui_logo.svg)
+
+A collection of various React UI components
 
 ## Installation
 
