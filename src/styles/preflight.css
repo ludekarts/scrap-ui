@@ -395,3 +395,20 @@ input:where([type="button"], [type="reset"], [type="submit"]),
 [hidden]:where(:not([hidden="until-found"])) {
   display: none !important;
 }
+
+body {
+  padding: 1em;
+  font-family: sans-serif;
+}
+
+button {
+  cursor: pointer;
+  padding: 1px 3px;
+  font-family: monospace;
+  border: 1px solid #262626;
+  background: rgba(0, 0, 0, 0.05);
+  transition: background 0.3s ease;
+  &:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}

@@ -1,229 +1,423 @@
 import React, {
   useRef,
+  useMemo,
   Children,
   useState,
   useEffect,
+  useContext,
   cloneElement,
+  createContext,
   useImperativeHandle,
 } from "react";
 
-interface ComboboxProps {
+interface ComboboxContextProps {
   name: string;
-  className?: string;
-  placeholder?: string;
-  selectedItem?: string;
-  listClassName?: string;
-  children?: React.ReactNode;
-  onChange?: (phrase: string) => void;
-  onSelect?: (index: number, isEmptyNode: boolean) => boolean | void;
+  listId: string;
+  label?: string;
+  isOpen: boolean;
+  inputId: string;
+  labelId?: string;
+  submitValue?: string;
+  childrenCount: number;
+  selectedValue?: string;
+  highlightedIndex: number;
+  toggleOpen: (open: boolean) => void;
+  selectOption: (index: number) => void;
+  setChildrenCount: (count: number) => void;
+  setHighlightedIndex: (index: number | ((prev: number) => number)) => void;
 }
 
-const Combobox = React.forwardRef<HTMLInputElement, ComboboxProps>(
-  (props, ref) => {
-    const {
-      name,
-      onSelect,
-      onChange,
-      children,
-      className,
-      placeholder,
-      selectedItem,
-      listClassName,
-    } = props;
-    const [highlightedIndex, setHighlightedIndex] = useState(-1);
-    const [inputValue, setInputValue] = useState(selectedItem || "");
-    const [isOpen, toggleOpen] = useState(false);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const listboxRef = useRef<HTMLUListElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    const labelId = `${name}-label`;
-    const inputId = `${name}-input`;
-    const listboxId = `${name}-listbox`;
-
-    useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
-
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setInputValue(value);
-      onChange?.(value);
-    };
-
-    const handleInputFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-      if (event.target.matches("input") && Children.count(children) > 0) {
-        toggleOpen(true);
-      }
-    };
-
-    const selectOption = (index: number) => {
-      const isEmptyNode = Boolean(
-        (listboxRef.current?.children[index] as HTMLElement).dataset.emptyNode,
-      );
-      inputRef.current?.focus();
-
-      if (typeof onSelect === "function") {
-        // Do not close dropdonw list if onSelect returns true.
-        if (onSelect(index, isEmptyNode)) {
-          return;
-        }
-      }
-
-      toggleOpen(false);
-      setHighlightedIndex(-1);
-    };
-
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const { key } = event;
-      const count = Children.count(children);
-
-      // On no results allow only Escape & Tab.
-      if (!count && !["Escape", "Tab"].includes(key)) return;
-
-      switch (key) {
-        case "ArrowDown":
-          event.preventDefault();
-          if (!isOpen && count > 0) {
-            toggleOpen(true);
-            setHighlightedIndex(0);
-          } else {
-            setHighlightedIndex((prev) => (prev + 1) % count);
-          }
-          break;
-        case "ArrowUp":
-          event.preventDefault();
-          if (!isOpen) return;
-          setHighlightedIndex((prev) => (prev - 1 + count) % count);
-          break;
-        case "Enter":
-          event.preventDefault();
-          if (isOpen && highlightedIndex >= 0) {
-            selectOption(highlightedIndex);
-          }
-          break;
-        case "Escape":
-          event.preventDefault();
-          toggleOpen(false);
-          setHighlightedIndex(-1);
-          break;
-        case "Tab":
-          // Close on tab out
-          if (isOpen && highlightedIndex >= 0) {
-            event.preventDefault();
-            selectOption(highlightedIndex);
-          } else {
-            toggleOpen(false);
-            setHighlightedIndex(-1);
-          }
-          break;
-        default:
-          // Reset highlight if user types characters.
-          setHighlightedIndex(-1);
-          break;
-      }
-    };
-
-    const handleItemCLick = (event: React.MouseEvent<HTMLElement>) => {
-      const target = event.target as HTMLElement;
-      if (target.role === "option") {
-        const selectIndex = Number(target.dataset.index);
-        selectOption(selectIndex);
-      }
-    };
-
-    const handleOutsideClick = (event: MouseEvent) => {
-      containerRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        toggleOpen(false);
-    };
-
-    useEffect(() => {
-      // Keep open if typing and results exist.
-      if (
-        inputValue.length > 0 &&
-        inputValue !== selectedItem &&
-        !isOpen &&
-        Children.count(children)
-      ) {
-        toggleOpen(true);
-      }
-    }, [inputValue]);
-
-    // Scroll highlighted item into view.
-    useEffect(() => {
-      if (isOpen && highlightedIndex >= 0 && listboxRef.current) {
-        const optionElement = listboxRef.current.children[highlightedIndex];
-        optionElement?.scrollIntoView({ block: "nearest" });
-      }
-    }, [highlightedIndex, isOpen]);
-
-    // Set full name of selected item in input field.
-    useEffect(() => {
-      typeof selectedItem === "string" && setInputValue(selectedItem);
-    }, [selectedItem]);
-
-    // Handle clicks outside to close
-    useEffect(() => {
-      document.addEventListener("mousedown", handleOutsideClick);
-      return () =>
-        document.removeEventListener("mousedown", handleOutsideClick);
-    }, []);
-
-    return (
-      <div
-        ref={containerRef}
-        onClick={handleItemCLick}
-        style={{ position: "relative" }}
-      >
-        <input
-          type="text"
-          name={name}
-          id={inputId}
-          ref={inputRef}
-          value={inputValue}
-          className={className}
-          placeholder={placeholder}
-          onKeyDown={handleKeyDown}
-          onFocus={handleInputFocus}
-          onChange={handleInputChange}
-          autoComplete="off"
-          role="combobox"
-          aria-expanded={isOpen}
-          aria-controls={listboxId}
-          aria-autocomplete="list"
-          aria-labelledby={labelId}
-          aria-activedescendant={
-            isOpen && highlightedIndex >= 0
-              ? `${name}-option-${highlightedIndex}`
-              : undefined
-          }
-        />
-        {
-          <ul
-            role="listbox"
-            id={listboxId}
-            ref={listboxRef}
-            aria-labelledby={labelId}
-            className={listClassName}
-            style={{ position: "absolute", width: "100%" }}
-            // No need for 'hidden' attribute if conditionally rendered.
-          >
-            {isOpen &&
-              Children.map(children, (child, index) =>
-                child === null
-                  ? null
-                  : cloneElement(child as React.ReactElement<any>, {
-                      role: "option",
-                      id: `${name}-option-${index}`,
-                      "data-index": index,
-                      "aria-selected": index === highlightedIndex,
-                    }),
-              )}
-          </ul>
-        }
-      </div>
-    );
-  },
+const ComboboxContext = createContext<ComboboxContextProps | undefined>(
+  undefined
 );
 
-Combobox.displayName = "Combobox";
-export default Combobox;
+function useComboboxContext() {
+  const context = useContext(ComboboxContext);
+  if (!context) {
+    throw new Error("useComboboxContext must be used within a Provider");
+  }
+  return context;
+}
+
+export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
+  name: string;
+  // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
+  label?: string;
+  submitValue?: string;
+  selectedValue?: string;
+  children?: React.ReactNode;
+  // 👉 onOptionSelected can return a boolean value (true) to prevent closing the dropdown.
+  onOptionSelected?: (
+    value: ComboboxSlection,
+    isEmptyOption: boolean
+  ) => boolean | void;
+}
+
+export type ComboboxSlection = string | number | null;
+
+export function Combobox(props: ComboboxProps) {
+  const {
+    name,
+    label,
+    children,
+    submitValue,
+    selectedValue = "",
+    onOptionSelected,
+    ...rest
+  } = props;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const submitRef = useRef<HTMLInputElement>(null);
+  const [isOpen, toggleOpen] = useState(false);
+  const [childrenCount, setChildrenCount] = useState(0);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
+  const combobox = useMemo(
+    () => ({
+      name,
+      isOpen,
+      submitValue,
+      selectedValue,
+      childrenCount,
+      highlightedIndex,
+      listId: `${name}-list`,
+      inputId: `${name}-input`,
+      toggleOpen,
+      selectOption,
+      setChildrenCount,
+      setHighlightedIndex,
+      ...getLabels(label),
+    }),
+    [
+      name,
+      isOpen,
+      submitValue,
+      selectedValue,
+      childrenCount,
+      highlightedIndex,
+      onOptionSelected,
+    ]
+  );
+
+  function selectOption(index: number) {
+    const list = document.getElementById(combobox.listId);
+    const input = document.getElementById(combobox.inputId) as HTMLInputElement;
+
+    input.focus();
+    input.value = selectedValue || "";
+
+    if (typeof onOptionSelected === "function") {
+      const [value, isEmpty] = getSelectedValue(name, index, list);
+
+      // Do not close dropdown list if onOptionSelected() returns "true".
+      if (onOptionSelected(value, isEmpty)) {
+        return;
+      }
+    }
+
+    if (index !== -1) {
+      toggleOpen(false);
+      setHighlightedIndex(-1);
+    }
+  }
+
+  function handleOutsideClick(event: MouseEvent) {
+    containerRef.current &&
+      !containerRef.current.contains(event.target as Node) &&
+      toggleOpen(false);
+  }
+
+  // Handle clicks outside to close
+  useEffect(() => {
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  return (
+    <ComboboxContext.Provider value={combobox}>
+      <div {...rest} ref={containerRef}>
+        {children}
+        {submitValue === undefined ? null : (
+          <input
+            name={name}
+            type="hidden"
+            ref={submitRef}
+            value={submitValue}
+          />
+        )}
+      </div>
+    </ComboboxContext.Provider>
+  );
+}
+
+export const ComboboxInput = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>((props, ref) => {
+  const { onKeyDown, onKeyUp, onFocus, onInput, onClick, ...rest } = props;
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    name,
+    label,
+    isOpen,
+    listId,
+    inputId,
+    labelId,
+    submitValue,
+    selectedValue,
+    childrenCount,
+    highlightedIndex,
+    toggleOpen,
+    selectOption,
+    setHighlightedIndex,
+  } = useComboboxContext();
+
+  const inputName = submitValue ? undefined : name;
+
+  const activeDescendant =
+    isOpen && highlightedIndex >= 0
+      ? `${name}-option-${highlightedIndex}`
+      : undefined;
+
+  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
+
+  function activateList(
+    event:
+      | React.FocusEvent<HTMLInputElement>
+      | React.MouseEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLInputElement>
+  ) {
+    childrenCount > 0 && !isOpen && toggleOpen(true);
+
+    // Forwaerd events to parent handlers.
+    if (event.type === "input" && onInput) {
+      onInput(event as React.FormEvent<HTMLInputElement>);
+    } else if (event.type === "focus" && onFocus) {
+      onFocus(event as React.FocusEvent<HTMLInputElement>);
+    } else if (event.type === "click" && onClick) {
+      onClick(event as React.MouseEvent<HTMLInputElement>);
+    }
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    const { key } = event;
+
+    // When no results allow only for below keys.
+    if (!childrenCount && !["Escape", "Tab"].includes(key)) return;
+
+    switch (key) {
+      case "ArrowDown":
+        event.preventDefault();
+        if (!isOpen && childrenCount > 0) {
+          toggleOpen(true);
+          setHighlightedIndex(0);
+        } else {
+          setHighlightedIndex((prev: number) => (prev + 1) % childrenCount);
+        }
+        break;
+
+      case "ArrowUp":
+        event.preventDefault();
+        if (!isOpen) return;
+        setHighlightedIndex((prev) =>
+          prev === -1
+            ? childrenCount - 1
+            : (prev - 1 + childrenCount) % childrenCount
+        );
+        break;
+
+      case "Enter":
+        event.preventDefault();
+        // Accept the highlighted option.
+        if (isOpen && highlightedIndex >= 0) {
+          selectOption(highlightedIndex);
+          return;
+        }
+        break;
+
+      case "Escape":
+        event.preventDefault();
+        toggleOpen(false);
+        setHighlightedIndex(-1);
+        // Reset input value to selected value.
+        if (selectedValue && inputRef.current) {
+          inputRef.current.value = selectedValue;
+        }
+        break;
+
+      case "Tab":
+        // Close on tab out.
+        if (isOpen && highlightedIndex >= 0) {
+          event.preventDefault();
+          selectOption(highlightedIndex);
+        } else {
+          toggleOpen(false);
+          setHighlightedIndex(-1);
+        }
+        break;
+
+      default:
+        // Reset highlight if user types characters.
+        setHighlightedIndex(-1);
+        break;
+    }
+    onKeyDown?.(event);
+  }
+
+  function handleKeyUp(event: React.KeyboardEvent<HTMLInputElement>) {
+    const { key, target } = event;
+
+    switch (key) {
+      case "Backspace":
+        if ((target as HTMLInputElement).value.length === 0) {
+          selectOption(-1);
+        }
+        break;
+      case "Delete":
+        if ((target as HTMLInputElement).value.length === 0) {
+          selectOption(-1);
+        }
+        break;
+    }
+    onKeyUp?.(event);
+  }
+
+  // Set full value for selected item in input field.
+  useEffect(() => {
+    if (typeof selectedValue === "string" && inputRef.current) {
+      inputRef.current.value = selectedValue;
+    }
+  }, [selectedValue]);
+
+  return (
+    <input
+      {...rest}
+      type="text"
+      id={inputId}
+      ref={inputRef}
+      name={inputName}
+      role="combobox"
+      autoComplete="off"
+      aria-owns={listId}
+      aria-label={label}
+      aria-expanded={isOpen}
+      aria-controls={listId}
+      aria-haspopup="listbox"
+      aria-autocomplete="list"
+      aria-labelledby={labelId}
+      aria-activedescendant={activeDescendant}
+      onKeyUp={handleKeyUp}
+      onInput={activateList}
+      onFocus={activateList}
+      onClick={activateList}
+      onKeyDown={handleKeyDown}
+    />
+  );
+});
+
+export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
+  const { children, ...rest } = props;
+  const listboxRef = useRef<HTMLUListElement>(null);
+  const {
+    name,
+    isOpen,
+    listId,
+    highlightedIndex,
+    selectOption,
+    setChildrenCount,
+  } = useComboboxContext();
+
+  function handleItemClick(event: React.MouseEvent<HTMLElement>) {
+    const target = event.target as HTMLElement;
+    if (target.role === "option") {
+      const selectIndex = Number(target.id.split("-").pop());
+      selectOption(selectIndex);
+    }
+  }
+
+  // Scroll highlighted item into view.
+  useEffect(() => {
+    if (isOpen && highlightedIndex >= 0 && listboxRef.current) {
+      const optionElement = listboxRef.current.children[highlightedIndex];
+      optionElement?.scrollIntoView({ block: "nearest" });
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // Count children and update childrenCount state.
+  useEffect(() => {
+    setChildrenCount(Children.count(children));
+  }, [children]);
+
+  return !isOpen ? null : (
+    <ul
+      {...rest}
+      id={listId}
+      role="listbox"
+      ref={listboxRef}
+      onClick={handleItemClick}
+    >
+      {Children.map(children, (child, index) =>
+        child === null
+          ? null
+          : cloneElement(child as React.ReactElement<any>, {
+              role: "option",
+              id: `${name}-option-${index}`,
+              "aria-selected": index === highlightedIndex,
+            })
+      )}
+    </ul>
+  );
+}
+
+interface ComboboxItemProps extends React.LiHTMLAttributes<HTMLLIElement> {
+  value?: string | number | undefined;
+  empty?: boolean;
+}
+
+export function ComboboxItem(props: ComboboxItemProps) {
+  const { children, value, empty = false, ...rest } = props;
+
+  if (!isItemValue(value)) {
+    throw new Error("ComboboxItem value must be a string or number.");
+  }
+
+  return (
+    <li
+      {...rest}
+      {...(empty ? { "data-empty-option": true } : {})}
+      data-suicbx-value={value}
+    >
+      {children}
+    </li>
+  );
+}
+
+// ---- Helpers ----------------
+
+function getSelectedValue(
+  name: string,
+  index: number,
+  list: HTMLElement | null
+): [ComboboxSlection, boolean] {
+  if (!list) return [null, false];
+  const item = list?.querySelector(`#${name}-option-${index}`);
+  if (!item) return [null, false];
+  const value = (item as HTMLElement).dataset.suicbxValue || null;
+  const isEmpty = item.hasAttribute("data-empty-option");
+  return [value, isEmpty];
+}
+
+function isItemValue(value: any): boolean {
+  return (
+    value === value || typeof value === "string" || typeof value === "number"
+  );
+}
+
+function getLabels(label?: string) {
+  if (!label) return {};
+  if (label.startsWith("#")) {
+    return { labelId: label.slice(1) };
+  } else {
+    return { label };
+  }
+}
