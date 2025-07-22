@@ -66,7 +66,6 @@ export function Combobox(props: ComboboxProps) {
     ...rest
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
-  const submitRef = useRef<HTMLInputElement>(null);
   const [isOpen, toggleOpen] = useState(false);
   const [childrenCount, setChildrenCount] = useState(0);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -137,12 +136,7 @@ export function Combobox(props: ComboboxProps) {
       <div {...rest} ref={containerRef}>
         {children}
         {submitValue === undefined ? null : (
-          <input
-            name={name}
-            type="hidden"
-            ref={submitRef}
-            value={submitValue}
-          />
+          <input name={name} type="hidden" value={submitValue} />
         )}
       </div>
     </ComboboxContext.Provider>

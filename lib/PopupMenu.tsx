@@ -38,7 +38,7 @@ export function PopupMenu(props: MenuPopupProps) {
     if (index === 0 && isValidElement(child) && child.type === "button") {
       const button = child as React.ReactElement<ButtonProps>;
       return cloneElement(button, {
-        popovertarget: name,
+        popoverTarget: name,
         className: `sui-anchor-button ${button.props.className ?? ""}`,
         style: { "--sui-anchor-name": `--sui-am-${name}` } as CSSProperties,
       });
