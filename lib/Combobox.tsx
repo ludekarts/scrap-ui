@@ -43,6 +43,7 @@ export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
   label?: string;
+  required?: boolean;
   submitValue?: string;
   selectedValue?: string;
   children?: React.ReactNode;
@@ -60,6 +61,7 @@ export function Combobox(props: ComboboxProps) {
     name,
     label,
     children,
+    required,
     submitValue,
     selectedValue = "",
     onOptionSelected,
@@ -74,6 +76,7 @@ export function Combobox(props: ComboboxProps) {
     () => ({
       name,
       isOpen,
+      required,
       submitValue,
       selectedValue,
       childrenCount,
@@ -89,6 +92,7 @@ export function Combobox(props: ComboboxProps) {
     [
       name,
       isOpen,
+      required,
       submitValue,
       selectedValue,
       childrenCount,
@@ -157,6 +161,7 @@ export const ComboboxInput = React.forwardRef<
     listId,
     inputId,
     labelId,
+    required,
     submitValue,
     selectedValue,
     childrenCount,
@@ -287,6 +292,7 @@ export const ComboboxInput = React.forwardRef<
     <input
       {...rest}
       type="text"
+      required={required}
       id={inputId}
       ref={inputRef}
       name={inputName}

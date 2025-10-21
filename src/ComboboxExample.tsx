@@ -68,6 +68,7 @@ export function BearboneComboboxExample() {
 export default function ComboboxExample() {
   const [fruits, setFruits] = useState<Fruit[]>(initFruits);
   const [phrase, setPhrase] = useState<string>("");
+  const [isRequired, toggleRequired] = useState<boolean>(false);
   const [selected, setSelected] = useState<Fruit | null>(null);
 
   const addFruit = (initFruit?: string) => {
@@ -120,6 +121,7 @@ export default function ComboboxExample() {
       <Combobox
         name="fruit"
         className="combobox"
+        required={isRequired}
         onOptionSelected={selectFruit}
         selectedValue={selected?.name || ""}
         submitValue={!selected ? undefined : selected.id}
@@ -151,8 +153,12 @@ export default function ComboboxExample() {
           </ComboboxItem>
         </ComboboxList>
       </Combobox>
+      <br />
       <div>
-        <br />
+        <button type="button" onClick={() => toggleRequired(!isRequired)}>
+          Require fruit selection: {isRequired ? "ON" : "OFF"}
+        </button>
+        <span> | </span>
         <button type="submit">Send form</button>
       </div>
     </form>

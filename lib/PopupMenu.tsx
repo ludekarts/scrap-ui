@@ -40,7 +40,7 @@ export function PopupMenu(props: MenuPopupProps) {
       return cloneElement(button, {
         popoverTarget: name,
         className: `sui-anchor-button ${button.props.className ?? ""}`,
-        style: { "--sui-anchor-name": `--sui-am-${name}` } as CSSProperties,
+        style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
       });
     } else if (
       index === 1 &&
@@ -56,7 +56,7 @@ export function PopupMenu(props: MenuPopupProps) {
         className: `sui-anchor-menu ${position} ${
           dialog.props.className ?? ""
         }`,
-        style: { "--sui-anchor-name": `--sui-am-${name}` } as CSSProperties,
+        style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
       });
     } else {
       console.error("MenuPopup must have 2 children <button/> and <dialog/>.");
