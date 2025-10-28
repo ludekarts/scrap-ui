@@ -54,7 +54,7 @@ function MainDialogComponent() {
   };
 
   return (
-    <MainDialog className={`border-dailog ${expended ? "" : "max-w-21"}`}>
+    <MainDialog className={`border-dialog ${expended ? "" : "max-w-21"}`}>
       <div className="rail spread">
         <h2>{icon} Base Dialog</h2>
         <button className="ghost" onClick={() => setExpanded(!expended)}>

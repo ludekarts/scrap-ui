@@ -8,6 +8,7 @@ import "./styles/playground.css";
 // Examles.
 import ComboboxExample, { BearboneComboboxExample } from "./ComboboxExample";
 import DialogExample from "./DialogExample";
+import ComboDialogExample from "./ComboDialogExample";
 
 // Playground.
 createRoot(document.getElementById("root")!).render(
@@ -23,6 +24,8 @@ createRoot(document.getElementById("root")!).render(
       <h2>Bearbone Combobox</h2>
       <BearboneComboboxExample />
       <hr />
+      <h2>Combo Dialog</h2>
+      <ComboDialogExample />
     </main>
   </StrictMode>
 );

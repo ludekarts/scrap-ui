@@ -62,6 +62,7 @@ function CustomCombobox() {
 
   - `name: string` - Unique identifier for the combobox, used for form submission and accessibility.
   - `label?: string` - Optional label for the combobox, can be an ID for a `<label/>` element (when starts with `#`) or regular string description.
+  - `required?: boolean` - Whether the combobox is required for form submission.Works with native HTML5 form validation.
   - `selectedValue?: string` - Value that represents the currently selected option (set outside of the Combobox).
   - `submitValue?: string` - Value other than _selectedValue_ to be assigned to the combobox input for form submission.
   - `children?: ReactNode` - Child components that make up the combobox, typically including `ComboboxInput`, `ComboboxList`, and `ComboboxItem`.

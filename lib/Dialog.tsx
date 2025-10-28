@@ -83,13 +83,6 @@ export function createDialog<R, P extends OpenProps = {}>(
                 }
               }
             }
-
-            // Handle Escape key exit (custom).
-            if (event.key === "Escape") {
-              event.stopPropagation();
-              event.preventDefault();
-              !noDismiss && dialogStore.closeDialog();
-            }
           };
 
           dialog.current.addEventListener("close", handleCloseTrigger);
@@ -104,11 +97,25 @@ export function createDialog<R, P extends OpenProps = {}>(
       }
     }, [isOpen]);
 
+    // Handle Escape key exit (custom).
+    // 📒 It is handled here not as "Tab" in useEffect to allow event.preventDefault()
+    // to work with other SUI components like Combobox inside the dialog.
+    const handleEscapePress = (
+      event: React.KeyboardEvent<HTMLDialogElement>
+    ) => {
+      if (event.key === "Escape" && !noDismiss) {
+        event.stopPropagation();
+        event.preventDefault();
+        dialogStore.closeDialog();
+      }
+    };
+
     return !isOpen ? null : (
       <dialog
         ref={dialog}
         id={dialogId}
         data-transition="init"
+        onKeyDown={handleEscapePress}
         className={animate ? `sui-animate ${className}` : className}
       >
         {children}

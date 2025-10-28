@@ -17,6 +17,7 @@ interface ComboboxContextProps {
   isOpen: boolean;
   inputId: string;
   labelId?: string;
+  required?: boolean;
   submitValue?: string;
   childrenCount: number;
   selectedValue?: string;
@@ -226,6 +227,7 @@ export const ComboboxInput = React.forwardRef<
         break;
 
       case "Enter":
+        event.stopPropagation();
         event.preventDefault();
         // Accept the highlighted option.
         if (isOpen && highlightedIndex >= 0) {
@@ -235,7 +237,13 @@ export const ComboboxInput = React.forwardRef<
         break;
 
       case "Escape":
-        event.preventDefault();
+        if (isOpen) {
+          // Prevent default behavior only when the list is open to not conflict
+          // with other components like Dialog that may also listen to Escape key.
+          event.stopPropagation();
+          event.preventDefault();
+        }
+
         toggleOpen(false);
         setHighlightedIndex(-1);
         // Reset input value to selected value.
