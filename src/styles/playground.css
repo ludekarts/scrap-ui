@@ -129,6 +129,7 @@ dialog.animated[data-transition="close-to-open"] {
 .combobox {
   width: 260px;
   padding: 0.2em;
+  position: relative;
   border-radius: 1.4em;
   background-color: #06ebb1;
   border: 2px dashed black;
@@ -146,6 +147,26 @@ dialog.animated[data-transition="close-to-open"] {
     padding: 0.3em 0.5em;
     background-color: white;
     border: 2px solid black;
+  }
+
+  & .combobox-input:user-invalid ~ .combobox-error {
+    display: block;
+  }
+
+  & .combobox-error {
+    left: 100%;
+    top: 0.3em;
+    display: none;
+    position: absolute;
+    color: whitesmoke;
+    margin-left: 0.5em;
+    white-space: nowrap;
+    border-radius: 0.4em;
+    padding: 0.3em 0.5em;
+    background-color: red;
+    &::before {
+      content: "⚠️";
+    }
   }
 
   & .combobox-icon {

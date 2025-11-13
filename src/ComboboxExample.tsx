@@ -128,6 +128,7 @@ export default function ComboboxExample() {
       >
         <div className="combobox-rail">
           <ComboboxInput
+            pattern="[a-zA-Z]+"
             className="combobox-input"
             placeholder="🔍 Search for a fruit"
             onChange={(event) =>
@@ -137,6 +138,7 @@ export default function ComboboxExample() {
           <span className="combobox-icon">
             {!selected ? "🌚" : selected.icon}
           </span>
+          <span className="combobox-error">Only letters are allowed</span>
         </div>
         <ComboboxList className="combobox-list">
           {fruits

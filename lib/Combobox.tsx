@@ -41,6 +41,7 @@ function useComboboxContext() {
 }
 
 export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
+  id?: string;
   name: string;
   // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
   label?: string;
@@ -59,6 +60,7 @@ export type ComboboxSlection = string | number | null;
 
 export function Combobox(props: ComboboxProps) {
   const {
+    id,
     name,
     label,
     children,
@@ -83,7 +85,7 @@ export function Combobox(props: ComboboxProps) {
       childrenCount,
       highlightedIndex,
       listId: `${name}-list`,
-      inputId: `${name}-input`,
+      inputId: id || `${name}-input`,
       toggleOpen,
       selectOption,
       setChildrenCount,
@@ -172,7 +174,7 @@ export const ComboboxInput = React.forwardRef<
     setHighlightedIndex,
   } = useComboboxContext();
 
-  const inputName = submitValue ? undefined : name;
+  const inputName = submitValue !== undefined ? undefined : name;
 
   const activeDescendant =
     isOpen && highlightedIndex >= 0
@@ -300,10 +302,10 @@ export const ComboboxInput = React.forwardRef<
     <input
       {...rest}
       type="text"
-      required={required}
       id={inputId}
       ref={inputRef}
       name={inputName}
+      required={required}
       role="combobox"
       autoComplete="off"
       aria-owns={listId}
