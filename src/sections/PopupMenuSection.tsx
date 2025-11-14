@@ -1,4 +1,4 @@
-import { PopupMenu } from "@ludekarts/scrap-ui";
+import { PopupMenu } from "../../lib/PopupMenu";
 
 export default function PopupMenuSection() {
   const handleButtonClick = (event: React.MouseEvent) => {
@@ -25,7 +25,7 @@ export default function PopupMenuSection() {
 
       <div className="examplebox flex center-content">
         <div className="flex gap">
-          <PopupMenu name="settings">
+          <PopupMenu name="settings" allowInsideClick>
             <button>Open Settings</button>
             <dialog className="popupmenu-dialog">
               <form
@@ -33,17 +33,16 @@ export default function PopupMenuSection() {
                 className="popupmenu-dialog-list "
               >
                 <div className="stack">
-                  <label className="text-xs" htmlFor="date">
-                    Date:
-                  </label>
-                  <input id="date" type="date" name="date" />
-                </div>
-
-                <div className="stack">
                   <label className="text-xs" htmlFor="username">
                     Username:
                   </label>
                   <input id="username" type="text" name="username" />
+                </div>
+                <div className="stack">
+                  <label className="text-xs" htmlFor="date">
+                    Date:
+                  </label>
+                  <input id="date" type="date" name="date" />
                 </div>
                 <hr />
                 <button type="submit">Save settings</button>

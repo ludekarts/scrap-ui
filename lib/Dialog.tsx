@@ -1,5 +1,8 @@
 import React, { useRef, useEffect, useSyncExternalStore } from "react";
 import { getFormFields } from "@ludekarts/utility-belt";
+import { getHeadAndTail, getFocusableNodes } from "./utils";
+
+// Types.
 import type { FormFieldsOptions } from "@ludekarts/utility-belt";
 
 interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
@@ -236,31 +239,4 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
 
 function getDialogId(name?: string) {
   return name || `sui-dialog-${Math.random().toString(36).substring(2, 15)}`;
-}
-
-// Custom version of querySelectorAll that not return elements from nested dialogs.
-function getFocusableNodes(node: Element | null | undefined): Element[] {
-  const result = [];
-  node && isFocusable(node) && result.push(node);
-  node = node?.firstElementChild;
-
-  // Go deep through all nodes except nested dialogs.
-  while (node && node.nodeName !== "DIALOG") {
-    result.push(getFocusableNodes(node));
-    node = node.nextElementSibling;
-  }
-
-  return result.flat();
-}
-
-function getHeadAndTail(source: any[]) {
-  return [source[0], source[source.length - 1]];
-}
-
-function isFocusable(node: Element) {
-  return Boolean(
-    node.matches(
-      `a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])`
-    )
-  );
 }

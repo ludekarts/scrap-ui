@@ -1,13 +1,13 @@
 import { useRef, Children, cloneElement, isValidElement } from "react";
-import type { CSSProperties } from "react";
+import { getFocusableNodes } from "./utils";
 
-type Position = "tl" | "tr" | "bl" | "br";
+// Types/
+import type { CSSProperties } from "react";
 
 interface MenuPopupProps {
   name: string;
-  position?: Position;
   children: React.ReactNode;
-  keepOnInsideClick?: boolean;
+  allowInsideClick?: boolean;
 }
 
 interface ButtonProps {
@@ -22,8 +22,10 @@ interface DialogProps {
 }
 
 export function PopupMenu(props: MenuPopupProps) {
-  const { name, children, keepOnInsideClick = false, position = "bl" } = props;
+  const { name, children, allowInsideClick = false } = props;
   const ref = useRef<HTMLDialogElement>(null);
+  const menuItems = useRef<Element[]>([]);
+  const index = useRef<number>(0);
 
   if (Children.count(children) !== 2) {
     console.error("MenuPopup must have 2 children <button/> and <dialog/>.");
@@ -31,34 +33,67 @@ export function PopupMenu(props: MenuPopupProps) {
   }
 
   const catchClicks = () => {
-    !keepOnInsideClick && ref.current && ref.current.hidePopover();
+    !allowInsideClick && ref.current && ref.current.hidePopover();
+  };
+
+  const catchKeyboard = (event: React.KeyboardEvent<HTMLDialogElement>) => {
+    // Handle Tab & Arrow Down.
+    if ((event.key === "Tab" && !event.shiftKey) || event.key === "ArrowDown") {
+      event.preventDefault();
+      index.current = (index.current + 1) % menuItems.current.length;
+      (menuItems.current[index.current] as HTMLElement).focus();
+    }
+
+    // Handle Arrow Up.
+    else if (
+      (event.key === "Tab" && event.shiftKey) ||
+      event.key === "ArrowUp"
+    ) {
+      event.preventDefault();
+      index.current =
+        (index.current - 1 + menuItems.current.length) %
+        menuItems.current.length;
+      (menuItems.current[index.current] as HTMLElement).focus();
+    }
+  };
+
+  const onMenuToggle = () => {
+    menuItems.current = getFocusableNodes(ref.current);
   };
 
   return Children.map(children, (child, index) => {
-    if (index === 0 && isValidElement(child) && child.type === "button") {
+    const IS_BUTTON =
+      index === 0 && isValidElement(child) && child.type === "button";
+
+    const IS_DAILOG =
+      index === 1 && isValidElement(child) && child.type === "dialog";
+
+    // Render Trigger Button.
+    if (IS_BUTTON) {
       const button = child as React.ReactElement<ButtonProps>;
       return cloneElement(button, {
         popoverTarget: name,
         className: `sui-anchor-button ${button.props.className ?? ""}`,
         style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
       });
-    } else if (
-      index === 1 &&
-      isValidElement(child) &&
-      child.type === "dialog"
-    ) {
+    }
+    // Render Menu.
+    else if (IS_DAILOG) {
       const dialog = child as React.ReactElement<DialogProps>;
       return cloneElement(dialog, {
         ref,
         id: name,
         popover: "auto",
         onClick: catchClicks,
-        className: `sui-anchor-menu ${position} ${
-          dialog.props.className ?? ""
-        }`,
+        onToggle: onMenuToggle,
+        onKeyDown: catchKeyboard,
+        className: `sui-anchor-menu ${dialog.props.className ?? ""}`,
         style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
       });
-    } else {
+    }
+
+    // Exit.
+    else {
       console.error("MenuPopup must have 2 children <button/> and <dialog/>.");
       return null;
     }
