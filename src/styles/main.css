@@ -1,0 +1,196 @@
+:root {
+  --yellow: #ffc100;
+}
+
+html,
+body {
+  height: 100%;
+  padding: 1em;
+  scroll-behavior: smooth;
+  background-color: var(--yellow);
+  font-family: "Dosis", sans-serif;
+}
+
+main {
+  gap: 1em;
+  display: flex;
+  margin: 0 auto;
+  max-width: 960px;
+  flex-direction: column;
+}
+
+section {
+  padding: 0.5em;
+  font-size: 1.1em;
+  line-height: 1.4em;
+  min-height: 450px;
+  scroll-margin-top: 4.5em;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+button {
+  font-size: 1em;
+  cursor: pointer;
+
+  font-family: inherit;
+  padding: 0.2em 0.5em;
+  border-radius: 0.5em;
+  background-color: white;
+  transition: background-color 0.3s ease;
+
+  &:focus {
+    outline: 2px solid black;
+  }
+
+  &:hover {
+    background-color: #ddde;
+  }
+}
+
+input {
+  border-radius: 0.5em;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0.2em 0.5em;
+  border: 2px solid gray;
+}
+
+h1 {
+  display: flex;
+  max-width: 450px;
+  font-size: 3.2em;
+  margin: 0.3em auto 0;
+  justify-content: center;
+}
+
+nav {
+  top: 0.5em;
+  z-index: 1000;
+  display: flex;
+  color: white;
+  padding: 0.5em;
+  position: sticky;
+  font-size: 1.3em;
+  margin: 2em auto;
+  max-width: 960px;
+  border-radius: 2em;
+  background-color: black;
+  justify-content: space-around;
+
+  & > a {
+    position: relative;
+
+    &::before {
+      content: "";
+      left: 0;
+
+      bottom: 0;
+      height: 0.2em;
+      border-radius: 6em;
+      position: absolute;
+      translate: 0 0.2em;
+      background-color: white;
+    }
+
+    &:hover::before {
+      animation-duration: 0.7s;
+      animation-name: slide;
+      animation-fill-mode: both;
+    }
+  }
+}
+
+@keyframes slide {
+  0% {
+    left: 0;
+    right: 100%;
+  }
+
+  40% {
+    left: 90%;
+    right: -30%;
+  }
+
+  100% {
+    left: 0;
+    right: 0;
+  }
+}
+
+h2 {
+  color: white;
+  font-size: 3em;
+  text-shadow: 2px 2px black;
+  font-family: "Bangers", sans-serif;
+  margin-bottom: 0.5em;
+}
+
+/* UTILS */
+
+.header {
+  font-size: 1.4em;
+  text-align: center;
+}
+
+.font-comic {
+  font-family: "Bangers", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.text-frame {
+  z-index: 0;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 1.5em 1.5em 1.5em 1.6em;
+  transition: background-color 0.3s ease;
+  clip-path: polygon(3% 12%, 100% 0%, 96% 100%, 0% 90%);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 1);
+  }
+
+  &::before {
+    inset: 0;
+    z-index: -1;
+    content: "";
+    position: absolute;
+    background: white;
+    clip-path: polygon(0 0, 100% -2%, 95% 90%, 0% 90%);
+  }
+}
+
+.examplebox {
+  width: 100%;
+  margin: 2em 0;
+  border-radius: 1em;
+  min-height: 200px;
+  border: 2px dashed rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.flex {
+  display: flex;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-xs {
+  font-size: 0.8em;
+}
+
+.center-content {
+  align-items: center;
+  justify-content: center;
+}
+
+.gap {
+  gap: 1em;
+}

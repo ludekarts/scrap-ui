@@ -1,0 +1,32 @@
+.popupmenu-dialog {
+  padding: 0.3em;
+  margin-top: 0.2em;
+  border-radius: 0.3em;
+  background-color: white;
+  box-shadow: 0px 3px 12px -3px rgba(0, 0, 0, 0.5);
+}
+
+.popupmenu-dialog-list {
+  gap: 0.2em;
+  min-width: 7.5em;
+  display: flex;
+  flex-direction: column;
+
+  & hr {
+    border-color: #ddd;
+    margin: 0.2em -0.3em;
+  }
+}
+
+.usermenu-btn {
+  gap: 1em;
+  display: flex;
+  align-items: center;
+  padding: 0.3em 1.2em 0.3em 0.3em;
+
+  & img {
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+  }
+}

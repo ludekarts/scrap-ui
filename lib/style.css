@@ -33,7 +33,6 @@ dialog.sui-animate[data-transition="close-to-open"] {
 }
 
 .sui-anchor-menu {
-  margin: 0;
   inset: auto;
   position: absolute;
   --sui-anchor-name: --sui-anchor-menu;
