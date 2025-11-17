@@ -1,7 +1,7 @@
 .popupmenu-dialog {
   padding: 0.3em;
   margin-top: 0.2em;
-  border-radius: 0.3em;
+  border-radius: 0.7em;
   background-color: white;
   box-shadow: 0px 3px 12px -3px rgba(0, 0, 0, 0.5);
 }
@@ -29,4 +29,9 @@
     height: 2em;
     border-radius: 50%;
   }
+}
+
+.scrap {
+  position: absolute;
+  z-index: -1;
 }

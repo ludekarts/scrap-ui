@@ -27,16 +27,15 @@ dialog.sui-animate[data-transition="close-to-open"] {
 
 /* POPOVER */
 
-.suianchor-button {
-  --sui-anchor-name: --sui-anchor-menu;
-  anchor-name: var(--anchor-name);
+.sui-anchor-button {
+  anchor-name: var(--sui-anchor-name);
 }
 
 .sui-anchor-menu {
   inset: auto;
   position: absolute;
-  --sui-anchor-name: --sui-anchor-menu;
-  position-anchor: var(--some-name);
+  position-anchor: var(--sui-anchor-name);
+  position-try-fallbacks: --popover;
 
   &.tr {
     right: anchor(right);
@@ -57,4 +56,10 @@ dialog.sui-animate[data-transition="close-to-open"] {
     right: anchor(right);
     top: anchor(bottom);
   }
+}
+
+@position-try --popover {
+  inset: unset;
+  right: anchor(right);
+  top: anchor(bottom);
 }

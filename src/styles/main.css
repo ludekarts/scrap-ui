@@ -59,6 +59,19 @@ input {
   border: 2px solid gray;
 }
 
+code {
+  margin: 0 0.2em;
+  padding: 0.2em 0.4em;
+  border-radius: 0.2em;
+  font-family: monospace;
+  background-color: rgba(0, 0, 0, 0.3);
+
+  &.balck {
+    color: white;
+    background-color: black;
+  }
+}
+
 h1 {
   display: flex;
   max-width: 450px;
@@ -129,6 +142,11 @@ h2 {
   margin-bottom: 0.5em;
 }
 
+h3 {
+  font-size: 1.2em;
+  margin-bottom: 0.4em;
+}
+
 /* UTILS */
 
 .header {
@@ -143,6 +161,13 @@ h2 {
 }
 
 .text-frame {
+  padding: 1em;
+  border-radius: 1em;
+  background-color: white;
+  border-bottom: 4px solid black;
+}
+
+.comic-frame {
   z-index: 0;
   position: relative;
   background-color: rgba(0, 0, 0, 0.5);
@@ -164,11 +189,38 @@ h2 {
   }
 }
 
+.scrap-frame {
+  z-index: 0;
+  padding: 1em 1em calc(28px + 1em) 1em;
+  flex-shrink: 0;
+  position: relative;
+
+  &::before {
+    content: "";
+    z-index: -1;
+    inset: 0 0 14px 0;
+    position: absolute;
+    background-color: white;
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+  }
+
+  &::after {
+    content: "";
+    left: 0;
+    right: 0;
+    height: 28px;
+    bottom: -14px;
+    position: absolute;
+    background-repeat: repeat-x;
+    background-image: url("/assets/scrap_bottom.svg");
+  }
+}
+
 .examplebox {
   width: 100%;
-  margin: 2em 0;
-  border-radius: 1em;
   min-height: 200px;
+  border-radius: 1em;
   border: 2px dashed rgba(0, 0, 0, 0.75);
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -182,6 +234,18 @@ h2 {
   flex-direction: column;
 }
 
+.rail {
+  display: flex;
+
+  &.--spread {
+    justify-content: space-between;
+  }
+
+  &.--items-center {
+    align-items: center;
+  }
+}
+
 .text-xs {
   font-size: 0.8em;
 }
@@ -193,4 +257,16 @@ h2 {
 
 .gap {
   gap: 1em;
+}
+
+.p-2 {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+}
+
+.columns-2 {
+  gap: 2em;
+  display: grid;
+  margin-top: 2em;
+  grid-template-columns: 1fr 1fr;
 }

@@ -1,11 +1,14 @@
 import { useRef, Children, cloneElement, isValidElement } from "react";
 import { getFocusableNodes } from "./utils";
 
-// Types/
+// Types.
 import type { CSSProperties } from "react";
+
+type MenuPosition = "tl" | "tr" | "bl" | "br";
 
 interface MenuPopupProps {
   name: string;
+  position?: MenuPosition;
   children: React.ReactNode;
   allowInsideClick?: boolean;
 }
@@ -17,12 +20,12 @@ interface ButtonProps {
 
 interface DialogProps {
   className?: string;
-  ref?: React.Ref<HTMLDialogElement>;
   [key: string]: any;
+  ref?: React.Ref<HTMLDialogElement>;
 }
 
 export function PopupMenu(props: MenuPopupProps) {
-  const { name, children, allowInsideClick = false } = props;
+  const { name, children, position = "bl", allowInsideClick = false } = props;
   const ref = useRef<HTMLDialogElement>(null);
   const menuItems = useRef<Element[]>([]);
   const index = useRef<number>(0);
@@ -59,6 +62,7 @@ export function PopupMenu(props: MenuPopupProps) {
 
   const onMenuToggle = () => {
     menuItems.current = getFocusableNodes(ref.current);
+    index.current = 0;
   };
 
   return Children.map(children, (child, index) => {
@@ -87,7 +91,9 @@ export function PopupMenu(props: MenuPopupProps) {
         onClick: catchClicks,
         onToggle: onMenuToggle,
         onKeyDown: catchKeyboard,
-        className: `sui-anchor-menu ${dialog.props.className ?? ""}`,
+        className: `sui-anchor-menu ${position} ${
+          dialog.props.className ?? ""
+        }`,
         style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
       });
     }

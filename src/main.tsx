@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import "./styles/preflight.css";
 import "./styles/main.css";
 import "./styles/popupmenu.css";
+import "../lib/style.css";
 
 import PopupMenuSection from "./sections/PopupMenuSection";
 
