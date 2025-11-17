@@ -82,8 +82,8 @@ export default function ComboboxSection() {
             <strong>Anatomy</strong>
           </h3>
         </div>
-        <div className="examplebox --expand flex center-content">
-          <div className="flex gap">
+        <div className="examplebox --expand flex items-center justify-center">
+          <div className="gap- flex">
             <form onSubmit={collectFormData}>
               <MultiCombobox
                 required

@@ -1,5 +1,7 @@
-:root {
-  --yellow: #ffc100;
+@import "tailwindcss";
+
+@theme {
+  --color-sui-yellow: #ffc100;
 }
 
 html,
@@ -7,8 +9,8 @@ body {
   height: 100%;
   padding: 1em;
   scroll-behavior: smooth;
-  background-color: var(--yellow);
   font-family: "Dosis", sans-serif;
+  background-color: var(--color-sui-yellow);
 }
 
 main {
@@ -22,10 +24,10 @@ main {
 section {
   padding: 0.5em;
   font-size: 1.1em;
-  line-height: 1.4em;
   min-height: 450px;
-  scroll-margin-top: 5em;
+  line-height: 1.4em;
   margin-bottom: 5em;
+  scroll-margin-top: 5em;
 }
 
 * {
