@@ -20,7 +20,7 @@ export function getFocusableNodes(node: Element | null | undefined): Element[] {
 function isFocusable(node: Element) {
   return Boolean(
     node.matches(
-      `a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])`
+      `a[href], button, input:not([type="hidden"]), textarea, select, [tabindex]:not([tabindex="-1"])`
     )
   );
 }

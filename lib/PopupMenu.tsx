@@ -1,4 +1,10 @@
-import { useRef, Children, cloneElement, isValidElement } from "react";
+import {
+  useRef,
+  useState,
+  Children,
+  cloneElement,
+  isValidElement,
+} from "react";
 import { getFocusableNodes } from "./utils";
 
 // Types.
@@ -26,17 +32,24 @@ interface DialogProps {
 
 export function PopupMenu(props: MenuPopupProps) {
   const { name, children, position = "bl", allowInsideClick = false } = props;
+  const [isOpnen, setIsOpen] = useState<boolean>(false);
   const ref = useRef<HTMLDialogElement>(null);
   const menuItems = useRef<Element[]>([]);
   const index = useRef<number>(0);
+
+  const pmId = `sui-pm-${name}`;
 
   if (Children.count(children) !== 2) {
     console.error("MenuPopup must have 2 children <button/> and <dialog/>.");
     return null;
   }
 
-  const catchClicks = () => {
+  const catchDialogClicks = (event: React.MouseEvent<HTMLElement>) => {
     !allowInsideClick && ref.current && ref.current.hidePopover();
+
+    if ((event.target as HTMLElement).matches("button[data-close]")) {
+      ref.current && ref.current.hidePopover();
+    }
   };
 
   const catchKeyboard = (event: React.KeyboardEvent<HTMLDialogElement>) => {
@@ -60,7 +73,9 @@ export function PopupMenu(props: MenuPopupProps) {
     }
   };
 
-  const onMenuToggle = () => {
+  // Missing ToogleEvent in types.
+  const onMenuToggle = (event: { newState: "open" | "closed" }) => {
+    setIsOpen(event.newState === "open");
     menuItems.current = getFocusableNodes(ref.current);
     index.current = 0;
   };
@@ -76,9 +91,12 @@ export function PopupMenu(props: MenuPopupProps) {
     if (IS_BUTTON) {
       const button = child as React.ReactElement<ButtonProps>;
       return cloneElement(button, {
-        popoverTarget: name,
+        popoverTarget: pmId,
+        "aria-controls": pmId,
+        "aria-haspopup": "menu",
+        "aria-expanded": isOpnen,
+        style: { "--sui-anchor-name": `--${pmId}` } as CSSProperties,
         className: `sui-anchor-button ${button.props.className ?? ""}`,
-        style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
       });
     }
     // Render Menu.
@@ -86,15 +104,16 @@ export function PopupMenu(props: MenuPopupProps) {
       const dialog = child as React.ReactElement<DialogProps>;
       return cloneElement(dialog, {
         ref,
-        id: name,
+        id: pmId,
+        role: "menu",
         popover: "auto",
-        onClick: catchClicks,
         onToggle: onMenuToggle,
         onKeyDown: catchKeyboard,
+        onClick: catchDialogClicks,
         className: `sui-anchor-menu ${position} ${
           dialog.props.className ?? ""
         }`,
-        style: { "--sui-anchor-name": `--sui-pm-${name}` } as CSSProperties,
+        style: { "--sui-anchor-name": `--${pmId}` } as CSSProperties,
       });
     }
 

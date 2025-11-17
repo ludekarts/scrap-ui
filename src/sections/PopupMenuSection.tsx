@@ -1,7 +1,17 @@
 import { PopupMenu } from "../../lib/PopupMenu";
-import Scrap from "../components/scrap";
+import { useState } from "react";
+
+const emojis = ["😀", "😎", "🤠", "🥳", "🤖", "👻", "💩", "👽", "🎃", "🐵"];
 
 export default function PopupMenuSection() {
+  const [emoji, setEmoji] = useState("😀");
+  const todayDate = new Date().toISOString().split("T")[0];
+
+  const chanegeEmoji = () => {
+    const randomIndex = Math.floor(Math.random() * emojis.length);
+    setEmoji(emojis[randomIndex]);
+  };
+
   const handleButtonClick = (event: React.MouseEvent) => {
     if (event.target instanceof HTMLButtonElement) {
       alert(`${event.target.textContent} button clicked!`);
@@ -12,8 +22,11 @@ export default function PopupMenuSection() {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const date = formData.get("date");
+    const emoji = formData.get("emoji");
     const username = formData.get("username");
-    alert(`Settings saved:\nDate: ${date}\nUsername: ${username}`);
+    alert(
+      `Settings saved:\nDate: ${date}\nUsername: ${username}\nEmoji: ${emoji}`
+    );
   };
 
   return (
@@ -66,14 +79,32 @@ export default function PopupMenuSection() {
                     </label>
                     <input id="username" type="text" name="username" />
                   </div>
+
                   <div className="stack">
                     <label className="text-xs" htmlFor="date">
                       Date:
                     </label>
-                    <input id="date" type="date" name="date" />
+                    <input
+                      id="date"
+                      type="date"
+                      name="date"
+                      defaultValue={todayDate}
+                    />
                   </div>
-                  <hr />
-                  <button type="submit">Save settings</button>
+                  <hr className="lg" />
+
+                  <button type="button" onClick={chanegeEmoji}>
+                    <span>{emoji}</span>
+                    <span> Change emoji</span>
+                  </button>
+
+                  <hr className="lg" />
+
+                  <input type="hidden" name="emoji" value={emoji} />
+
+                  <button type="submit" data-close aria-label="Save & close">
+                    Save settings
+                  </button>
                 </form>
               </dialog>
             </PopupMenu>
