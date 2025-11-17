@@ -18,7 +18,6 @@ interface ComboboxContextProps {
   inputId: string;
   labelId?: string;
   required?: boolean;
-  submitValue?: string;
   childrenCount: number;
   selectedValue?: string;
   highlightedIndex: number;
@@ -46,7 +45,6 @@ export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
   // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
   label?: string;
   required?: boolean;
-  submitValue?: string;
   selectedValue?: string;
   children?: React.ReactNode;
   // 👉 onOptionSelected can return a boolean value (true) to prevent closing the dropdown.
@@ -65,7 +63,6 @@ export function Combobox(props: ComboboxProps) {
     label,
     children,
     required,
-    submitValue,
     selectedValue = "",
     onOptionSelected,
     ...rest
@@ -80,7 +77,6 @@ export function Combobox(props: ComboboxProps) {
       name,
       isOpen,
       required,
-      submitValue,
       selectedValue,
       childrenCount,
       highlightedIndex,
@@ -96,7 +92,6 @@ export function Combobox(props: ComboboxProps) {
       name,
       isOpen,
       required,
-      submitValue,
       selectedValue,
       childrenCount,
       highlightedIndex,
@@ -142,9 +137,6 @@ export function Combobox(props: ComboboxProps) {
     <ComboboxContext.Provider value={combobox}>
       <div {...rest} ref={containerRef}>
         {children}
-        {submitValue === undefined ? null : (
-          <input name={name} type="hidden" value={submitValue} />
-        )}
       </div>
     </ComboboxContext.Provider>
   );
@@ -165,7 +157,6 @@ export const ComboboxInput = React.forwardRef<
     inputId,
     labelId,
     required,
-    submitValue,
     selectedValue,
     childrenCount,
     highlightedIndex,
@@ -174,7 +165,7 @@ export const ComboboxInput = React.forwardRef<
     setHighlightedIndex,
   } = useComboboxContext();
 
-  const inputName = submitValue !== undefined ? undefined : name;
+  const inputName = name;
 
   const activeDescendant =
     isOpen && highlightedIndex >= 0

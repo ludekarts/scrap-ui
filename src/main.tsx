@@ -8,6 +8,7 @@ import "./styles/popupmenu.css";
 import "../lib/style.css";
 
 import PopupMenuSection from "./sections/PopupMenuSection";
+import ComboboxSection from "./sections/combobox/ComboboxSection";
 
 // Sections.
 
@@ -45,6 +46,7 @@ createRoot(document.getElementById("root")!).render(
       </section>
       <section id="combobox">
         <h2 className="bangers shadow-hard">Combobox</h2>
+        <ComboboxSection />
       </section>
       <section id="popupmenu">
         <h2 className="bangers shadow-hard">PoupMenu</h2>

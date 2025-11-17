@@ -24,7 +24,8 @@ section {
   font-size: 1.1em;
   line-height: 1.4em;
   min-height: 450px;
-  scroll-margin-top: 4.5em;
+  scroll-margin-top: 5em;
+  margin-bottom: 5em;
 }
 
 * {
@@ -96,6 +97,12 @@ nav {
 
   & > a {
     position: relative;
+    border-radius: 3em;
+    padding: 0 0.5em;
+
+    &:focus {
+      outline: 2px solid white;
+    }
 
     &::before {
       content: "";
@@ -113,6 +120,11 @@ nav {
       animation-duration: 0.7s;
       animation-name: slide;
       animation-fill-mode: both;
+      transition: bottom 0.3s ease;
+    }
+
+    &:hover:focus::before {
+      bottom: -0.3em;
     }
   }
 }
@@ -244,6 +256,11 @@ h3 {
   &.--items-center {
     align-items: center;
   }
+}
+
+.--expand {
+  width: 100%;
+  grid-column: 1 / -1;
 }
 
 .text-xs {
