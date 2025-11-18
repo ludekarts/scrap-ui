@@ -1,4 +1,8 @@
-import MultiCombobox from "./MultiCombobox";
+import MultiComboboxExample from "./MultiCombobox";
+import BasicComboboxExample from "./BasicCombobox";
+import { Show } from "../../../lib/Show";
+import { useState } from "react";
+
 export type Fruit = {
   id: string;
   name: string;
@@ -17,11 +21,15 @@ const initFruits: Fruit[] = [
 ];
 
 export default function ComboboxSection() {
+  const [tab, selectTab] = useState<"Bearbone" | "Multibox" | "Validation">(
+    "Bearbone",
+  );
+
   const collectFormData = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    console.log("Form Data Submitted: ", data);
+    alert("Form Data Submitted:\n" + JSON.stringify(data, null, 2));
   };
 
   return (
@@ -85,37 +93,29 @@ export default function ComboboxSection() {
 
         <div className="col-span-full mt-6 flex flex-col">
           <div className="ml-auto flex gap-2">
-            <button>Bearbone</button>
-            <button>Multibox</button>
-            <button>Validation</button>
+            <button onClick={() => selectTab("Bearbone")}>Bearbone</button>
+            <button onClick={() => selectTab("Multibox")}>Multibox</button>
+            <button onClick={() => selectTab("Validation")}>Validation</button>
           </div>
 
           <div className="examplebox mt-4 flex items-center justify-center">
-            <div className="flex">
-              <form onSubmit={collectFormData}>
-                <label
-                  htmlFor="best-fruits"
-                  className="block w-fit rounded-t-md border-b border-gray-200 bg-white px-2 py-1 text-sm"
-                >
-                  Select your favorite fruits:
-                </label>
-                <div className="flex items-start rounded-tr-md rounded-b-md border-b-3 border-black bg-white">
-                  <MultiCombobox
-                    required
-                    name="best-fruits"
-                    label="Select your favorite fruits"
-                    source={initFruits.map((f) => f.name)}
-                  />
-                  <button
-                    type="submit"
-                    data-tw="true"
-                    className="size-10 cursor-pointer rounded-md hover:bg-gray-200"
-                  >
-                    💾
-                  </button>
-                </div>
-              </form>
-            </div>
+            <Show
+              when={[
+                tab === "Bearbone",
+                tab === "Multibox",
+                tab === "Validation",
+              ]}
+            >
+              <BasicComboboxExample
+                onSubmit={collectFormData}
+                fruits={initFruits}
+              />
+              <MultiComboboxExample
+                onSubmit={collectFormData}
+                fruits={initFruits}
+              />
+              <div>Validation</div>
+            </Show>
           </div>
         </div>
       </div>

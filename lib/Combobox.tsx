@@ -17,7 +17,6 @@ interface ComboboxContextProps {
   isOpen: boolean;
   inputId: string;
   labelId?: string;
-  required?: boolean;
   childrenCount: number;
   selectedValue?: string;
   highlightedIndex: number;
@@ -28,7 +27,7 @@ interface ComboboxContextProps {
 }
 
 const ComboboxContext = createContext<ComboboxContextProps | undefined>(
-  undefined
+  undefined,
 );
 
 function useComboboxContext() {
@@ -44,13 +43,12 @@ export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
   label?: string;
-  required?: boolean;
   selectedValue?: string;
   children?: React.ReactNode;
   // 👉 onOptionSelected can return a boolean value (true) to prevent closing the dropdown.
   onOptionSelected?: (
     value: ComboboxSlection,
-    isEmptyOption: boolean
+    isEmptyOption: boolean,
   ) => boolean | void;
 }
 
@@ -62,7 +60,6 @@ export function Combobox(props: ComboboxProps) {
     name,
     label,
     children,
-    required,
     selectedValue = "",
     onOptionSelected,
     ...rest
@@ -76,7 +73,6 @@ export function Combobox(props: ComboboxProps) {
     () => ({
       name,
       isOpen,
-      required,
       selectedValue,
       childrenCount,
       highlightedIndex,
@@ -91,12 +87,11 @@ export function Combobox(props: ComboboxProps) {
     [
       name,
       isOpen,
-      required,
       selectedValue,
       childrenCount,
       highlightedIndex,
       onOptionSelected,
-    ]
+    ],
   );
 
   function selectOption(index: number) {
@@ -156,7 +151,6 @@ export const ComboboxInput = React.forwardRef<
     listId,
     inputId,
     labelId,
-    required,
     selectedValue,
     childrenCount,
     highlightedIndex,
@@ -178,7 +172,7 @@ export const ComboboxInput = React.forwardRef<
     event:
       | React.FocusEvent<HTMLInputElement>
       | React.MouseEvent<HTMLInputElement>
-      | React.KeyboardEvent<HTMLInputElement>
+      | React.KeyboardEvent<HTMLInputElement>,
   ) {
     childrenCount > 0 && !isOpen && toggleOpen(true);
 
@@ -215,7 +209,7 @@ export const ComboboxInput = React.forwardRef<
         setHighlightedIndex((prev) =>
           prev === -1
             ? childrenCount - 1
-            : (prev - 1 + childrenCount) % childrenCount
+            : (prev - 1 + childrenCount) % childrenCount,
         );
         break;
 
@@ -296,7 +290,6 @@ export const ComboboxInput = React.forwardRef<
       id={inputId}
       ref={inputRef}
       name={inputName}
-      required={required}
       role="combobox"
       autoComplete="off"
       aria-owns={listId}
@@ -364,7 +357,7 @@ export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
               role: "option",
               id: `${name}-option-${index}`,
               "aria-selected": index === highlightedIndex,
-            })
+            }),
       )}
     </ul>
   );
@@ -398,7 +391,7 @@ export function ComboboxItem(props: ComboboxItemProps) {
 function getSelectedValue(
   name: string,
   index: number,
-  list: HTMLElement | null
+  list: HTMLElement | null,
 ): [ComboboxSlection, boolean] {
   if (!list) return [null, false];
   const item = list?.querySelector(`#${name}-option-${index}`);

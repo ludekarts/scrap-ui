@@ -8,8 +8,10 @@ import {
 } from "../../../lib/Combobox";
 
 import type { ComboboxSlection } from "../../../lib/Combobox";
+import type { Fruit } from "./index";
 
 type MultiComboboxProps = {
+  id?: string;
   name: string;
   label?: string;
   reset?: number;
@@ -17,7 +19,52 @@ type MultiComboboxProps = {
   source?: string[] | null;
 };
 
-export default function MultiCombobox(props: MultiComboboxProps) {
+interface ExampleProps {
+  onSubmit: (data: any) => void;
+  fruits: Fruit[];
+}
+
+export default function MultiComboboxExample(props: ExampleProps) {
+  const { onSubmit, fruits } = props;
+
+  const handleSubmission = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const bestFruits = formData.get("best-fruits");
+
+    console.log(bestFruits);
+
+    // const result  = bestFruits.map((fruit => fruit.toString()));
+  };
+  return (
+    <form onSubmit={handleSubmission}>
+      <label
+        htmlFor="best-fruits"
+        className="block w-fit rounded-t-md border-b border-gray-200 bg-white px-2 py-1 text-sm"
+      >
+        Select your favorite fruits:
+      </label>
+      <div className="flex items-start rounded-tr-md rounded-b-md border-b-3 border-black bg-white">
+        <MultiCombobox
+          required
+          name="fruits"
+          id="best-fruits"
+          label="Select your favorite fruits"
+          source={fruits?.map((f) => f.name)}
+        />
+        <button
+          type="submit"
+          data-tw="true"
+          className="size-10 cursor-pointer rounded-md hover:bg-gray-200"
+        >
+          💾
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function MultiCombobox(props: MultiComboboxProps) {
   const { name, source, label, reset, required = false } = props;
 
   // TODO: implement "required" validation.
@@ -69,7 +116,6 @@ export default function MultiCombobox(props: MultiComboboxProps) {
     <Combobox
       name=""
       label={label}
-      required={required}
       className="relative w-72 p-2"
       onOptionSelected={selectItem}
     >
@@ -95,6 +141,7 @@ export default function MultiCombobox(props: MultiComboboxProps) {
             ))}
         <ComboboxInput
           data-tw="true"
+          // required={required}
           onChange={updateValue}
           onKeyDown={traceBckspace}
           className="ml-1 border-none outline-none"
@@ -110,7 +157,7 @@ export default function MultiCombobox(props: MultiComboboxProps) {
                 <ComboboxItem
                   key={item}
                   value={item.toString()}
-                  className="aria-selected:bg-sui-yellow cursor-pointer truncate rounded p-2 capitalize"
+                  className="aria-selected:bg-sui-yellow cursor-pointer truncate rounded p-2 capitalize hover:bg-amber-300"
                 >
                   {item}
                 </ComboboxItem>
