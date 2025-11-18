@@ -22,14 +22,14 @@ type OpenProps = Record<string, any> | undefined;
 type CreateDialogController<R = any, P = OpenProps> = {
   open: (props?: P) => Promise<R>;
   close: (
-    data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent
+    data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent,
   ) => void;
   // This is a Hook, so use it like one.
   useDialogState: () => { isOpen: boolean } & P;
 };
 
 export function createDialog<R, P extends OpenProps = {}>(
-  options: CreateDialogOptions = {}
+  options: CreateDialogOptions = {},
 ): [React.FC<DialogProps>, CreateDialogController<R | undefined, P>] {
   const {
     name,
@@ -68,7 +68,7 @@ export function createDialog<R, P extends OpenProps = {}>(
           }, 10);
 
           const [head, tail] = getHeadAndTail(
-            getFocusableNodes(dialog.current)
+            getFocusableNodes(dialog.current),
           );
 
           const keybordHandler = (event: KeyboardEvent) => {
@@ -104,7 +104,7 @@ export function createDialog<R, P extends OpenProps = {}>(
     // 📒 It is handled here not as "Tab" in useEffect to allow event.preventDefault()
     // to work with other SUI components like Combobox inside the dialog.
     const handleEscapePress = (
-      event: React.KeyboardEvent<HTMLDialogElement>
+      event: React.KeyboardEvent<HTMLDialogElement>,
     ) => {
       if (event.key === "Escape" && !noDismiss) {
         event.stopPropagation();
@@ -132,7 +132,7 @@ export function createDialog<R, P extends OpenProps = {}>(
     return useSyncExternalStore(
       dialogStore.subscribe,
       dialogStore.getDialogState,
-      dialogStore.getDialogState
+      dialogStore.getDialogState,
     );
   }
 
@@ -153,8 +153,8 @@ export function createDialog<R, P extends OpenProps = {}>(
           dialogStore.closeDialog(
             getFormFields(
               (data as React.FormEvent).target as HTMLFormElement,
-              formParser || {}
-            ) as R
+              formParser || {},
+            ) as R,
           );
           return;
         }
@@ -187,7 +187,7 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
   let state = { isOpen: forceOpen } as { isOpen: boolean } & P;
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
-  let timer: number | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
   return {
     openDialog(resolve: Resolver, props: OpenProps = {}) {
       lastActiveElement = document.activeElement as HTMLElement;

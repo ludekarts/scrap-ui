@@ -22,24 +22,24 @@ Set of accessible primitives to craft a combobox experience that allows users to
 import { Combobox, ComboboxList, ComboboxInput, ComboboxItem } from "@ludekarts/scrap-ui";
 ...
 
-const fruits = ["apple", ...];
+const fruits = ["apple", "banana", "cherry", "date", "elderberry", ...];
 
 function CustomCombobox() {
   const [phrase, setPhrase] = useState<string>("");
   const [selectedValue, setSelectedValue] = useState<string>();
 
-  const selectOption = (value: ComboboxSlection) => {
+  const selectOption = (value: ComboboxSelection) => {
     setSelectedValue(fruits.find((f) => f === value));
   };
 
   return(
     <Combobox
-      name="basic"
-      label="List of fruits"
       selectedValue={selectedValue}
       onOptionSelected={selectOption}
     >
       <ComboboxInput
+        name="basic"
+        label="List of fruits"
         onChange={(event) => setPhrase(event.target.value.toLocaleLowerCase())}
       />
       <ComboboxList>
@@ -59,13 +59,9 @@ function CustomCombobox() {
 #### Combobox components breakdown
 
 - **Combobox** - Main wrapper component for the combobox functionality
-
-  - `name: string` - Unique identifier for the combobox, used for form submission and accessibility.
-  - `label?: string` - Optional label for the combobox, can be an ID for a `<label/>` element (when starts with `#`) or regular string description.
-  - `required?: boolean` - Whether the combobox is required for form submission.Works with native HTML5 form validation.
   - `selectedValue?: string` - Value that represents the currently selected option (set outside of the Combobox).
   - `submitValue?: string` - Value other than _selectedValue_ to be assigned to the combobox input for form submission.
-  - `children?: ReactNode` - Child components that make up the combobox, typically including `ComboboxInput`, `ComboboxList`, and `ComboboxItem`.
+  - `children?: ReactNode` - Child components that make up the combobox, typically including `ComboboxInput`, `ComboboxList`, and s`ComboboxItem`.
   - `onOptionSelected?: fn` - Callback function that is called when an option is selected. It can return a boolean value (`true`) to prevent closing the dropdown.
 
 - **ComboboxInput** - Input field for user search and interaction
