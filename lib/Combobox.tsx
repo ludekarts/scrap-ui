@@ -1,4 +1,5 @@
 import React, {
+  useId,
   useRef,
   useMemo,
   Children,
@@ -11,12 +12,8 @@ import React, {
 } from "react";
 
 interface ComboboxContextProps {
-  name: string;
   listId: string;
-  label?: string;
   isOpen: boolean;
-  inputId: string;
-  labelId?: string;
   childrenCount: number;
   selectedValue?: string;
   highlightedIndex: number;
@@ -39,10 +36,6 @@ function useComboboxContext() {
 }
 
 export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
-  id?: string;
-  name: string;
-  // 👉 Label can be an ID for <label/> element (starting with #) or a string description.
-  label?: string;
   selectedValue?: string;
   children?: React.ReactNode;
   // 👉 onOptionSelected can return a boolean value (true) to prevent closing the dropdown.
@@ -55,54 +48,39 @@ export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
 export type ComboboxSlection = string | number | null;
 
 export function Combobox(props: ComboboxProps) {
-  const {
-    id,
-    name,
-    label,
-    children,
-    selectedValue = "",
-    onOptionSelected,
-    ...rest
-  } = props;
+  const { children, selectedValue = "", onOptionSelected, ...rest } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOpen, toggleOpen] = useState(false);
   const [childrenCount, setChildrenCount] = useState(0);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const listId = useId();
 
   const combobox = useMemo(
     () => ({
-      name,
       isOpen,
+      listId,
       selectedValue,
       childrenCount,
       highlightedIndex,
-      listId: `${name}-list`,
-      inputId: id || `${name}-input`,
       toggleOpen,
       selectOption,
       setChildrenCount,
       setHighlightedIndex,
-      ...getLabels(label),
     }),
-    [
-      name,
-      isOpen,
-      selectedValue,
-      childrenCount,
-      highlightedIndex,
-      onOptionSelected,
-    ],
+    [isOpen, selectedValue, childrenCount, highlightedIndex, onOptionSelected],
   );
 
   function selectOption(index: number) {
     const list = document.getElementById(combobox.listId);
-    const input = document.getElementById(combobox.inputId) as HTMLInputElement;
+    const input = document.querySelector(
+      `[aria-owns="${combobox.listId}"]`,
+    ) as HTMLInputElement;
 
     input.focus();
     input.value = selectedValue || "";
 
     if (typeof onOptionSelected === "function") {
-      const [value, isEmpty] = getSelectedValue(name, index, list);
+      const [value, isEmpty] = getSelectedValue(list, listId, index);
 
       // Do not close dropdown list if onOptionSelected() returns "true".
       if (onOptionSelected(value, isEmpty)) {
@@ -145,12 +123,8 @@ export const ComboboxInput = React.forwardRef<
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
-    name,
-    label,
     isOpen,
     listId,
-    inputId,
-    labelId,
     selectedValue,
     childrenCount,
     highlightedIndex,
@@ -159,11 +133,9 @@ export const ComboboxInput = React.forwardRef<
     setHighlightedIndex,
   } = useComboboxContext();
 
-  const inputName = name;
-
   const activeDescendant =
     isOpen && highlightedIndex >= 0
-      ? `${name}-option-${highlightedIndex}`
+      ? `${listId}-option-${highlightedIndex}`
       : undefined;
 
   useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
@@ -287,18 +259,14 @@ export const ComboboxInput = React.forwardRef<
     <input
       {...rest}
       type="text"
-      id={inputId}
       ref={inputRef}
-      name={inputName}
       role="combobox"
       autoComplete="off"
       aria-owns={listId}
-      aria-label={label}
       aria-expanded={isOpen}
       aria-controls={listId}
       aria-haspopup="listbox"
       aria-autocomplete="list"
-      aria-labelledby={labelId}
       aria-activedescendant={activeDescendant}
       onKeyUp={handleKeyUp}
       onInput={activateList}
@@ -312,14 +280,8 @@ export const ComboboxInput = React.forwardRef<
 export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
   const { children, ...rest } = props;
   const listboxRef = useRef<HTMLUListElement>(null);
-  const {
-    name,
-    isOpen,
-    listId,
-    highlightedIndex,
-    selectOption,
-    setChildrenCount,
-  } = useComboboxContext();
+  const { isOpen, listId, highlightedIndex, selectOption, setChildrenCount } =
+    useComboboxContext();
 
   function handleItemClick(event: React.MouseEvent<HTMLElement>) {
     const target = event.target as HTMLElement;
@@ -355,7 +317,7 @@ export function ComboboxList(props: React.HTMLAttributes<HTMLUListElement>) {
           ? null
           : cloneElement(child as React.ReactElement<any>, {
               role: "option",
-              id: `${name}-option-${index}`,
+              id: `${listId}-option-${index}`,
               "aria-selected": index === highlightedIndex,
             }),
       )}
@@ -379,7 +341,7 @@ export function ComboboxItem(props: ComboboxItemProps) {
     <li
       {...rest}
       {...(empty ? { "data-empty-option": true } : {})}
-      data-suicbx-value={value}
+      data-cbx-value={value}
     >
       {children}
     </li>
@@ -389,14 +351,14 @@ export function ComboboxItem(props: ComboboxItemProps) {
 // ---- Helpers ----------------
 
 function getSelectedValue(
-  name: string,
-  index: number,
   list: HTMLElement | null,
+  listId: string,
+  index: number,
 ): [ComboboxSlection, boolean] {
   if (!list) return [null, false];
-  const item = list?.querySelector(`#${name}-option-${index}`);
+  const item = list?.querySelector(`#${listId}-option-${index}`);
   if (!item) return [null, false];
-  const value = (item as HTMLElement).dataset.suicbxValue || null;
+  const value = (item as HTMLElement).dataset.cbxValue || null;
   const isEmpty = item.hasAttribute("data-empty-option");
   return [value, isEmpty];
 }
@@ -405,13 +367,4 @@ function isItemValue(value: any): boolean {
   return (
     value === value || typeof value === "string" || typeof value === "number"
   );
-}
-
-function getLabels(label?: string) {
-  if (!label) return {};
-  if (label.startsWith("#")) {
-    return { labelId: label.slice(1) };
-  } else {
-    return { label };
-  }
 }

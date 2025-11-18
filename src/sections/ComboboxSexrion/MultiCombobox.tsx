@@ -11,9 +11,8 @@ import type { ComboboxSlection } from "../../../lib/Combobox";
 import type { Fruit } from "./index";
 
 type MultiComboboxProps = {
-  id?: string;
+  id: string;
   name: string;
-  label?: string;
   reset?: number;
   required?: boolean;
   source?: string[] | null;
@@ -30,16 +29,30 @@ export default function MultiComboboxExample(props: ExampleProps) {
   const handleSubmission = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const bestFruits = formData.get("best-fruits");
+    const results = Object.fromEntries(formData.entries()) as {
+      fruits: string;
+    };
 
-    console.log(bestFruits);
+    if (results.fruits.length === 0) {
+      event.currentTarget.reset();
+      event.currentTarget.reportValidity();
+      return;
+    }
+
+    const bestFruits = results.fruits.split("|");
+
+    onSubmit(
+      bestFruits.map(
+        (name) => fruits.find((fruit) => fruit.name === name)?.icon,
+      ),
+    );
 
     // const result  = bestFruits.map((fruit => fruit.toString()));
   };
   return (
     <form onSubmit={handleSubmission}>
       <label
-        htmlFor="best-fruits"
+        htmlFor="multiFruitPicker"
         className="block w-fit rounded-t-md border-b border-gray-200 bg-white px-2 py-1 text-sm"
       >
         Select your favorite fruits:
@@ -48,8 +61,7 @@ export default function MultiComboboxExample(props: ExampleProps) {
         <MultiCombobox
           required
           name="fruits"
-          id="best-fruits"
-          label="Select your favorite fruits"
+          id="multiFruitPicker"
           source={fruits?.map((f) => f.name)}
         />
         <button
@@ -65,10 +77,7 @@ export default function MultiComboboxExample(props: ExampleProps) {
 }
 
 function MultiCombobox(props: MultiComboboxProps) {
-  const { name, source, label, reset, required = false } = props;
-
-  // TODO: implement "required" validation.
-
+  const { id, name, source, reset, required = false } = props;
   const [collection, setCollection] = useState<string[]>([]);
   const [submitValue, setSubmitValue] = useState<string>("");
   const [value, setValue] = useState<string>("");
@@ -99,9 +108,7 @@ function MultiCombobox(props: MultiComboboxProps) {
   };
 
   useEffect(() => {
-    if (collection.length) {
-      setSubmitValue(collection.join("|"));
-    }
+    setSubmitValue(collection.join("|"));
   }, [collection]);
 
   useEffect(() => {
@@ -113,12 +120,7 @@ function MultiCombobox(props: MultiComboboxProps) {
   }, [reset]);
 
   return (
-    <Combobox
-      name=""
-      label={label}
-      className="relative w-72 p-2"
-      onOptionSelected={selectItem}
-    >
+    <Combobox className="relative w-72 p-2" onOptionSelected={selectItem}>
       <div className="flex flex-wrap items-center gap-1">
         {!collection.length
           ? null
@@ -140,12 +142,21 @@ function MultiCombobox(props: MultiComboboxProps) {
               </span>
             ))}
         <ComboboxInput
+          id={id}
           data-tw="true"
-          // required={required}
           onChange={updateValue}
           onKeyDown={traceBckspace}
-          className="ml-1 border-none outline-none"
+          aria-labelledby={`${id}-desc`}
+          required={required && collection.length === 0}
+          className="peer relative z-10 ml-1 border-none outline-none"
         />
+        <p
+          id={`${id}-desc`}
+          aria-hidden="true"
+          className="absolute -bottom-6 left-1 mt-1 hidden rounded-md bg-red-600 px-1 text-sm text-white peer-user-invalid:block"
+        >
+          Select at least one item from the list.
+        </p>
         <input type="hidden" name={name} value={submitValue} />
       </div>
       <ComboboxList className="absolute -right-10 left-0 z-10 mt-4 max-h-80 overflow-auto rounded-md border-2 bg-white p-2 shadow-lg empty:hidden">

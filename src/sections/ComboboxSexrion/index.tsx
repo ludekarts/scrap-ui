@@ -25,10 +25,7 @@ export default function ComboboxSection() {
     "Bearbone",
   );
 
-  const collectFormData = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+  const collectFormData = (data: any) => {
     alert("Form Data Submitted:\n" + JSON.stringify(data, null, 2));
   };
 
@@ -95,17 +92,10 @@ export default function ComboboxSection() {
           <div className="ml-auto flex gap-2">
             <button onClick={() => selectTab("Bearbone")}>Bearbone</button>
             <button onClick={() => selectTab("Multibox")}>Multibox</button>
-            <button onClick={() => selectTab("Validation")}>Validation</button>
           </div>
 
           <div className="examplebox mt-4 flex items-center justify-center">
-            <Show
-              when={[
-                tab === "Bearbone",
-                tab === "Multibox",
-                tab === "Validation",
-              ]}
-            >
+            <Show when={[tab === "Bearbone", tab === "Multibox"]}>
               <BasicComboboxExample
                 onSubmit={collectFormData}
                 fruits={initFruits}
@@ -114,7 +104,6 @@ export default function ComboboxSection() {
                 onSubmit={collectFormData}
                 fruits={initFruits}
               />
-              <div>Validation</div>
             </Show>
           </div>
         </div>
