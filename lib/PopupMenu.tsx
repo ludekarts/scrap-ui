@@ -57,7 +57,7 @@ export function PopupMenu(props: MenuPopupProps) {
     if ((event.key === "Tab" && !event.shiftKey) || event.key === "ArrowDown") {
       event.preventDefault();
       index.current = (index.current + 1) % menuItems.current.length;
-      (menuItems.current[index.current] as HTMLElement).focus();
+      (menuItems.current[index.current] as HTMLElement)?.focus();
     }
 
     // Handle Arrow Up.
@@ -69,7 +69,7 @@ export function PopupMenu(props: MenuPopupProps) {
       index.current =
         (index.current - 1 + menuItems.current.length) %
         menuItems.current.length;
-      (menuItems.current[index.current] as HTMLElement).focus();
+      (menuItems.current[index.current] as HTMLElement)?.focus();
     }
   };
 

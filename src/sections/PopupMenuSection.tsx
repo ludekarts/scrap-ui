@@ -66,6 +66,15 @@ export default function PopupMenuSection() {
 
         <div className="examplebox flex items-center justify-center">
           <div className="flex items-center gap-6">
+            <PopupMenu name="tooltip">
+              <button className="h-10">Show tooltip</button>
+              <dialog className="my-1 max-w-72 rounded-md p-2 shadow-lg">
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                Molestias maiores error at totam mollitia, architecto, amet
+                cumque explicabo incidunt ipsa eum culpa ullam itaque dicta quod
+                iusto. Esse, id eius?
+              </dialog>
+            </PopupMenu>
             <PopupMenu name="settings" allowInsideClick>
               <button className="h-10">Open Settings</button>
               <dialog className="my-1 rounded-md p-2 shadow-lg">
