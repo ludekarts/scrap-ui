@@ -25,7 +25,7 @@ export default function PopupMenuSection() {
     const emoji = formData.get("emoji");
     const username = formData.get("username");
     alert(
-      `Settings saved:\nDate: ${date}\nUsername: ${username}\nEmoji: ${emoji}`
+      `Settings saved:\nDate: ${date}\nUsername: ${username}\nEmoji: ${emoji}`,
     );
   };
 
@@ -39,7 +39,7 @@ export default function PopupMenuSection() {
         click outside to close the menu.
       </p>
 
-      <div className="columns-2">
+      <div className="mt-10 grid grid-cols-2 gap-6">
         <div className="scrap-frame">
           <h3>
             <strong>Props</strong>
@@ -64,24 +64,26 @@ export default function PopupMenuSection() {
           </ul>
         </div>
 
-        <div className="examplebox flex center-content">
-          <div className="flex gap">
+        <div className="examplebox flex items-center justify-center">
+          <div className="flex items-center gap-6">
             <PopupMenu name="settings" allowInsideClick>
-              <button>Open Settings</button>
-              <dialog className="popupmenu-dialog">
-                <form
-                  onSubmit={handleSettings}
-                  className="popupmenu-dialog-list p-2"
-                >
-                  <div className="stack">
-                    <label className="text-xs" htmlFor="username">
+              <button className="h-10">Open Settings</button>
+              <dialog className="my-1 rounded-md p-2 shadow-lg">
+                <form onSubmit={handleSettings} className="grid">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm" htmlFor="username">
                       Username:
                     </label>
-                    <input id="username" type="text" name="username" />
+                    <input
+                      id="username"
+                      type="text"
+                      name="username"
+                      autoComplete="off"
+                    />
                   </div>
 
-                  <div className="stack">
-                    <label className="text-xs" htmlFor="date">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm" htmlFor="date">
                       Date:
                     </label>
                     <input
@@ -91,14 +93,14 @@ export default function PopupMenuSection() {
                       defaultValue={todayDate}
                     />
                   </div>
-                  <hr className="lg" />
+                  <hr className="-mx-2 my-2 border-gray-200" />
 
                   <button type="button" onClick={chanegeEmoji}>
                     <span>{emoji}</span>
                     <span> Change emoji</span>
                   </button>
 
-                  <hr className="lg" />
+                  <hr className="-mx-2 my-2 border-gray-200" />
 
                   <input type="hidden" name="emoji" value={emoji} />
 
@@ -110,19 +112,24 @@ export default function PopupMenuSection() {
             </PopupMenu>
 
             <PopupMenu name="usermenu" position="bl">
-              <button className="usermenu-btn">
-                <img src="/assets/avatar.svg" alt="avatar" />
+              <button className="flex h-10 items-center gap-2">
+                <img
+                  className="size-7 rounded-full"
+                  src="/assets/avatar.svg"
+                  alt="avatar"
+                />
                 <span>John Doe</span>
               </button>
-              <dialog className="popupmenu-dialog ">
+              <dialog className="my-1 rounded-md p-2 shadow-lg">
                 <div
-                  className="popupmenu-dialog-list"
+                  className="flex w-24 flex-col gap-1"
                   onClick={handleButtonClick}
                 >
                   <button>My profile</button>
                   <button>Account</button>
                   <button>Payments</button>
-                  <hr />
+                  <hr className="-mx-2 my-2 border-gray-200" />
+
                   <button>Logout</button>
                 </div>
               </dialog>

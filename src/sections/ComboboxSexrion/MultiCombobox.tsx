@@ -70,25 +70,26 @@ export default function MultiCombobox(props: MultiComboboxProps) {
       name=""
       label={label}
       required={required}
-      className="relative w-full"
+      className="relative w-72 p-2"
       onOptionSelected={selectItem}
     >
-      <div className="border-cm-dark-blue/30 outline-cm-orange focus:border-cm-orange flex w-full flex-wrap gap-2 rounded-md border-2 bg-white p-2">
+      <div className="flex flex-wrap items-center gap-1">
         {!collection.length
           ? null
           : collection.map((item) => (
               <span
                 key={item}
-                className="bg-cm-orange flex h-6 items-center gap-2 truncate rounded-full pr-1 pl-2 text-xs font-semibold capitalize"
+                className="inline-flex items-center gap-2 rounded-full bg-black py-0.5 pr-1 pl-2 text-sm text-white uppercase"
               >
                 {item}
                 <button
                   type="button"
+                  data-tw="true"
                   data-index={item}
                   onClick={removeItem}
-                  className="shrink-0 rounded-full bg-black/10 text-white"
+                  className="flex size-5 cursor-pointer items-center justify-center rounded-full"
                 >
-                  x
+                  ✕
                 </button>
               </span>
             ))}
@@ -96,11 +97,11 @@ export default function MultiCombobox(props: MultiComboboxProps) {
           data-tw="true"
           onChange={updateValue}
           onKeyDown={traceBckspace}
-          className="w-1 shrink grow basis-auto border-none outline-none"
+          className="ml-1 border-none outline-none"
         />
         <input type="hidden" name={name} value={submitValue} />
       </div>
-      <ComboboxList className="border-cm-dark-blue/30 absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-md border bg-white p-2 shadow-lg empty:hidden">
+      <ComboboxList className="absolute -right-10 left-0 z-10 mt-4 max-h-80 overflow-auto rounded-md border-2 bg-white p-2 shadow-lg empty:hidden">
         {!source
           ? null
           : source
@@ -109,7 +110,7 @@ export default function MultiCombobox(props: MultiComboboxProps) {
                 <ComboboxItem
                   key={item}
                   value={item.toString()}
-                  className="hover:bg-cm-orange/80 aria-selected:bg-cm-orange cursor-pointer truncate rounded p-2 capitalize"
+                  className="aria-selected:bg-sui-yellow cursor-pointer truncate rounded p-2 capitalize"
                 >
                   {item}
                 </ComboboxItem>

@@ -34,7 +34,7 @@ export default function ComboboxSection() {
         users type, making it easier to find and select options quickly.
       </p>
 
-      <div className="columns-2">
+      <div className="mt-6 grid grid-cols-2 gap-6">
         <div className="scrap-frame">
           <h3>
             <strong>Props</strong>
@@ -82,17 +82,40 @@ export default function ComboboxSection() {
             <strong>Anatomy</strong>
           </h3>
         </div>
-        <div className="examplebox --expand flex items-center justify-center">
-          <div className="gap- flex">
-            <form onSubmit={collectFormData}>
-              <MultiCombobox
-                required
-                label="Select your favorite fruits"
-                name="best-fruits"
-                source={initFruits.map((f) => f.name)}
-              />
-              <button type="submit">Submit</button>
-            </form>
+
+        <div className="col-span-full mt-6 flex flex-col">
+          <div className="ml-auto flex gap-2">
+            <button>Bearbone</button>
+            <button>Multibox</button>
+            <button>Validation</button>
+          </div>
+
+          <div className="examplebox mt-4 flex items-center justify-center">
+            <div className="flex">
+              <form onSubmit={collectFormData}>
+                <label
+                  htmlFor="best-fruits"
+                  className="block w-fit rounded-t-md border-b border-gray-200 bg-white px-2 py-1 text-sm"
+                >
+                  Select your favorite fruits:
+                </label>
+                <div className="flex items-start rounded-tr-md rounded-b-md border-b-3 border-black bg-white">
+                  <MultiCombobox
+                    required
+                    name="best-fruits"
+                    label="Select your favorite fruits"
+                    source={initFruits.map((f) => f.name)}
+                  />
+                  <button
+                    type="submit"
+                    data-tw="true"
+                    className="size-10 cursor-pointer rounded-md hover:bg-gray-200"
+                  >
+                    💾
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>

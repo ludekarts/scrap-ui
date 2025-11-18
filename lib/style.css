@@ -35,7 +35,8 @@ dialog.sui-animate[data-transition="close-to-open"] {
   inset: auto;
   position: absolute;
   position-anchor: var(--sui-anchor-name);
-  position-try-fallbacks: --popover;
+  position-try-fallbacks: --popover-right;
+  position-try-fallbacks: --popover-bottom;
 
   &.tr {
     right: anchor(right);
@@ -58,8 +59,14 @@ dialog.sui-animate[data-transition="close-to-open"] {
   }
 }
 
-@position-try --popover {
+@position-try --popover-right {
   inset: unset;
-  right: anchor(right);
   top: anchor(bottom);
+  right: anchor(right);
+}
+
+@position-try --popover-bottom {
+  inset: unset;
+  bottom: anchor(top);
+  right: anchor(right);
 }

@@ -2,15 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 // Styles.
-import "./styles/preflight.css";
 import "./styles/main.css";
-import "./styles/popupmenu.css";
 import "../lib/style.css";
 
-import PopupMenuSection from "./sections/PopupMenuSection";
-import ComboboxSection from "./sections/combobox/ComboboxSection";
-
 // Sections.
+import PopupMenuSection from "./sections/PopupMenuSection";
+import ComboboxSection from "./sections/ComboboxSexrion";
 
 // Playground.
 createRoot(document.getElementById("root")!).render(
@@ -56,7 +53,7 @@ createRoot(document.getElementById("root")!).render(
         <h2 className="bangers shadow-hard">Show</h2>
       </section>
     </main>
-  </StrictMode>
+  </StrictMode>,
 );
 
 /*
