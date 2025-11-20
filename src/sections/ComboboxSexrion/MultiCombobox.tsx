@@ -148,7 +148,7 @@ function MultiCombobox(props: MultiComboboxProps) {
           onKeyDown={traceBckspace}
           aria-labelledby={`${id}-desc`}
           required={required && collection.length === 0}
-          className="peer relative z-10 ml-1 border-none outline-none"
+          className="peer ml-1 w-1 shrink grow basis-auto border-none outline-none"
         />
         <p
           id={`${id}-desc`}

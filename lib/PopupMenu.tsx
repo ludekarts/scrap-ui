@@ -53,14 +53,23 @@ export function PopupMenu(props: MenuPopupProps) {
   };
 
   const catchKeyboard = (event: React.KeyboardEvent<HTMLDialogElement>) => {
-    // Handle Tab & Arrow Down.
-    if ((event.key === "Tab" && !event.shiftKey) || event.key === "ArrowDown") {
+    // When no focusable content then exit on Tab.
+    if (event.key === "Tab" && menuItems.current.length === 0) {
+      event.preventDefault();
+      ref.current && ref.current.hidePopover();
+      return;
+    }
+    // Handle Tab & Arrow Down - move forward.
+    else if (
+      (event.key === "Tab" && !event.shiftKey) ||
+      event.key === "ArrowDown"
+    ) {
       event.preventDefault();
       index.current = (index.current + 1) % menuItems.current.length;
       (menuItems.current[index.current] as HTMLElement)?.focus();
     }
 
-    // Handle Arrow Up.
+    // Handle Shift + Tab & Arrow Up - move backward.
     else if (
       (event.key === "Tab" && event.shiftKey) ||
       event.key === "ArrowUp"
