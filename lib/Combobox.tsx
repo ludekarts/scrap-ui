@@ -107,11 +107,16 @@ export function Combobox(props: ComboboxProps) {
       toggleOpen(false);
   }
 
-  // Handle clicks outside to close
+  // Handle clicks outside to close.
   useEffect(() => {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  // Open list when it has any children.
+  useEffect(() => {
+    childrenCount > 0 && toggleOpen(true);
+  }, [childrenCount]);
 
   return (
     <ComboboxContext.Provider value={combobox}>

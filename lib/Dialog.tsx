@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useSyncExternalStore } from "react";
 import { getFormFields } from "@ludekarts/utility-belt";
 import { getHeadAndTail, getFocusableNodes } from "./utils";
+import React, { useRef, useEffect, useSyncExternalStore } from "react";
 
 // Types.
 import type { FormFieldsOptions } from "@ludekarts/utility-belt";
@@ -47,8 +47,7 @@ export function createDialog<R, P extends OpenProps = {}>(
     const { isOpen } = useDialogState();
 
     // Prevents from memory leak when user close dialog with <form method="dialog">.
-    const handleCloseTrigger = (event: Event) => {
-      event.preventDefault();
+    const handleCloseTrigger = () => {
       dialogStore.closeDialog();
     };
 
@@ -74,6 +73,10 @@ export function createDialog<R, P extends OpenProps = {}>(
           const keybordHandler = (event: KeyboardEvent) => {
             // Handle Tab key focus navigation.
             if (event.key === "Tab") {
+              // Escape if there are no focusable nodes.
+              if (!head || !tail) {
+                return;
+              }
               if (event.shiftKey) {
                 if (document.activeElement === head) {
                   event.preventDefault();
@@ -113,12 +116,37 @@ export function createDialog<R, P extends OpenProps = {}>(
       }
     };
 
+    // Handle "noDismiss" for form submission with method="dialog".
+    const handleSubmitCapture = (event: React.FormEvent<HTMLDialogElement>) => {
+      if (!noDismiss) {
+        return;
+      }
+      const target = event.target as HTMLFormElement | null;
+      if (target?.tagName !== "FORM") {
+        return;
+      }
+      const method = target.getAttribute("method");
+      if (method?.toLowerCase() === "dialog") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const handleDialogCancel = (event: React.FormEvent<HTMLDialogElement>) => {
+      if (noDismiss) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
     return !isOpen ? null : (
       <dialog
         ref={dialog}
         id={dialogId}
         data-transition="init"
         onKeyDown={handleEscapePress}
+        onSubmitCapture={handleSubmitCapture}
+        onCancel={handleDialogCancel}
         className={animate ? `sui-animate ${className}` : className}
       >
         {children}
@@ -182,18 +210,28 @@ export function createDialog<R, P extends OpenProps = {}>(
 // ---- Helpers ----------------
 
 function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
-  let listener: (() => void) | undefined;
+  const listeners = new Set<() => void>();
   let resolver: Resolver | undefined;
   let state = { isOpen: forceOpen } as { isOpen: boolean } & P;
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
   let timer: ReturnType<typeof setTimeout> | null = null;
+  const notify = () => {
+    listeners.forEach((cb) => cb());
+  };
   return {
     openDialog(resolve: Resolver, props: OpenProps = {}) {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      if (resolver) {
+        resolver(undefined);
+      }
       lastActiveElement = document.activeElement as HTMLElement;
-      state = { ...state, ...props, isOpen: true };
+      state = { isOpen: true, ...(props || {}) } as { isOpen: boolean } & P;
       resolver = resolve;
-      listener?.();
+      notify();
     },
 
     closeDialog(data?: R) {
@@ -203,8 +241,11 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
       }
       resolver?.(data);
       resolver = undefined;
+      if (timer) {
+        clearTimeout(timer);
+      }
       timer = setTimeout(() => {
-        listener?.();
+        notify();
         // Restore focus to the last active element after dialog is closed.
         setTimeout(() => {
           if (lastActiveElement) {
@@ -217,13 +258,18 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
     },
 
     subscribe(cb: () => void) {
-      listener = cb;
+      listeners.add(cb);
       return () => {
-        dialogRef = null;
-        listener = undefined;
-        resolver = undefined;
-        lastActiveElement = null;
-        timer && clearTimeout(timer);
+        listeners.delete(cb);
+        if (listeners.size === 0) {
+          dialogRef = null;
+          resolver = undefined;
+          lastActiveElement = null;
+          if (timer) {
+            clearTimeout(timer);
+            timer = null;
+          }
+        }
       };
     },
 
