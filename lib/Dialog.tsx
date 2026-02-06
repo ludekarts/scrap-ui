@@ -5,11 +5,12 @@ import React, { useRef, useEffect, useSyncExternalStore } from "react";
 // Types.
 import type { FormFieldsOptions } from "@ludekarts/utility-belt";
 
-interface DialogComponentProps extends React.HTMLAttributes<HTMLDialogElement> {
+export interface DialogComponentProps
+  extends React.HTMLAttributes<HTMLDialogElement> {
   noDismiss?: boolean;
 }
 
-interface DialogCreateOptions {
+export interface DialogCreateOptions {
   name?: string;
   animate?: boolean;
   outDelay?: number;
@@ -17,20 +18,35 @@ interface DialogCreateOptions {
   formParser?: FormFieldsOptions;
 }
 
-type DialogResolve = (data?: any) => void;
-type DialogOpenProps = Record<string, any> | undefined;
-type DialogController<R = any, P = DialogOpenProps> = {
-  open: (props?: P) => Promise<R>;
+type DialogOpenProps = Record<string, unknown>;
+type DialogState<OpenProps extends DialogOpenProps> = {
+  isOpen: boolean;
+} & OpenProps;
+type DialogResolve<Result> = (data?: Result) => void;
+export type DialogController<
+  Result = unknown,
+  OpenProps extends DialogOpenProps = Record<string, never>,
+> = {
+  open: (props?: OpenProps) => Promise<Result>;
   close: (
-    data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent,
+    data?:
+      | Result
+      | React.FormEvent<HTMLFormElement>
+      | React.MouseEvent<HTMLElement>,
   ) => void;
   // This is a Hook, so use it like one.
-  useDialogState: () => { isOpen: boolean } & P;
+  useDialogState: () => DialogState<OpenProps>;
 };
 
-export function createDialog<R, P extends DialogOpenProps = {}>(
+export function createDialog<
+  Result = unknown,
+  OpenProps extends DialogOpenProps = Record<string, never>,
+>(
   options: DialogCreateOptions = {},
-): [React.FC<DialogComponentProps>, DialogController<R | undefined, P>] {
+): [
+  React.FC<DialogComponentProps>,
+  DialogController<Result | undefined, OpenProps>,
+] {
   const {
     name,
     formParser,
@@ -39,7 +55,7 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
     outDelay = animate ? 300 : 0,
   } = options;
   const dialogId = getDialogId(name);
-  const dialogStore = createDialogStore<R, P>(forceOpen, outDelay);
+  const dialogStore = createDialogStore<Result, OpenProps>(forceOpen, outDelay);
 
   const Dialog = (props: DialogComponentProps) => {
     const { children, noDismiss, className } = props;
@@ -80,12 +96,12 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
               if (event.shiftKey) {
                 if (document.activeElement === head) {
                   event.preventDefault();
-                  tail.focus();
+                  (tail as HTMLElement).focus();
                 }
               } else {
                 if (document.activeElement === tail) {
                   event.preventDefault();
-                  head.focus();
+                  (head as HTMLElement).focus();
                 }
               }
             }
@@ -104,31 +120,33 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
     }, [isOpen]);
 
     // Handle Escape key exit (custom).
-    // 📒 It is handled here not as "Tab" in useEffect to allow event.preventDefault()
+    // 📒 It is handled here not like "Tab" in useEffect to allow event.preventDefault()
     // to work with other SUI components like Combobox inside the dialog.
     const handleEscapePress = (
       event: React.KeyboardEvent<HTMLDialogElement>,
     ) => {
-      if (event.key === "Escape" && !noDismiss) {
-        event.stopPropagation();
-        event.preventDefault();
-        dialogStore.closeDialog();
+      if (event.key === "Escape") {
+        if (noDismiss) {
+          event.stopPropagation();
+          event.preventDefault();
+        } else {
+          dialogStore.closeDialog();
+        }
       }
     };
 
     // Handle "noDismiss" for form submission with method="dialog".
     const handleSubmitCapture = (event: React.FormEvent<HTMLDialogElement>) => {
-      if (!noDismiss) {
-        return;
-      }
-      const target = event.target as HTMLFormElement | null;
-      if (target?.tagName !== "FORM") {
-        return;
-      }
-      const method = target.getAttribute("method");
-      if (method?.toLowerCase() === "dialog") {
-        event.preventDefault();
-        event.stopPropagation();
+      if (noDismiss) {
+        const target = event.target as HTMLFormElement | null;
+        if (target?.tagName !== "FORM") {
+          return;
+        }
+        const method = target.getAttribute("method");
+        if (method?.toLowerCase() === "dialog") {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       }
     };
 
@@ -156,7 +174,7 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
 
   // State hook.
 
-  function useDialogState() {
+  function useDialogState(): DialogState<OpenProps> {
     return useSyncExternalStore(
       dialogStore.subscribe,
       dialogStore.getDialogState,
@@ -167,13 +185,18 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
   // Dialog Controller API.
 
   const dialogController = {
-    async open(props?: DialogOpenProps) {
-      return new Promise<R | undefined>((resolve) => {
+    async open(props?: OpenProps) {
+      return new Promise<Result | undefined>((resolve) => {
         dialogStore.openDialog(resolve, props);
       });
     },
 
-    close(data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent) {
+    close(
+      data?:
+        | Result
+        | React.FormEvent<HTMLFormElement>
+        | React.MouseEvent<HTMLElement>,
+    ) {
       if (data) {
         // Handle close by form submission.
         if ((data as React.FormEvent).type === "submit") {
@@ -182,7 +205,7 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
             getFormFields(
               (data as React.FormEvent).target as HTMLFormElement,
               formParser || {},
-            ) as R,
+            ) as Result,
           );
           return;
         }
@@ -192,7 +215,7 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
         }
         // Not an event, assume it's a custom data to return.
         else {
-          dialogStore.closeDialog(data as R);
+          dialogStore.closeDialog(data as Result);
         }
       }
       // No data.
@@ -209,18 +232,20 @@ export function createDialog<R, P extends DialogOpenProps = {}>(
 
 // ---- Helpers ----------------
 
-function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
+function createDialogStore<Result, OpenProps extends DialogOpenProps>(
+  forceOpen: boolean,
+  outDelay: number,
+) {
   const listeners = new Set<() => void>();
-  let resolver: DialogResolve | undefined;
-  let state = { isOpen: forceOpen } as { isOpen: boolean } & P;
+  let resolver: DialogResolve<Result> | undefined;
+  let state = { isOpen: forceOpen } as DialogState<OpenProps>;
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
   let timer: ReturnType<typeof setTimeout> | null = null;
-  const notify = () => {
-    listeners.forEach((cb) => cb());
-  };
+  const notify = () => listeners.forEach((cb) => cb());
+
   return {
-    openDialog(resolve: DialogResolve, props: DialogOpenProps = {}) {
+    openDialog(resolve: DialogResolve<Result>, props?: OpenProps) {
       if (timer) {
         clearTimeout(timer);
         timer = null;
@@ -229,12 +254,12 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
         resolver(undefined);
       }
       lastActiveElement = document.activeElement as HTMLElement;
-      state = { isOpen: true, ...(props || {}) } as { isOpen: boolean } & P;
+      state = { isOpen: true, ...(props || {}) } as DialogState<OpenProps>;
       resolver = resolve;
       notify();
     },
 
-    closeDialog(data?: R) {
+    closeDialog(data?: Result) {
       state = { ...state, isOpen: false };
       if (dialogRef) {
         dialogRef.dataset.transition = "open-to-close";
