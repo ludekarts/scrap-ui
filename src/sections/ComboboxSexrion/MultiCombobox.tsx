@@ -132,7 +132,6 @@ function MultiCombobox(props: MultiComboboxProps) {
                 {item}
                 <button
                   type="button"
-                  data-tw="true"
                   data-index={item}
                   onClick={removeItem}
                   className="flex size-5 cursor-pointer items-center justify-center rounded-full"
@@ -143,7 +142,6 @@ function MultiCombobox(props: MultiComboboxProps) {
             ))}
         <ComboboxInput
           id={id}
-          data-tw="true"
           onChange={updateValue}
           onKeyDown={traceBckspace}
           aria-labelledby={`${id}-desc`}

@@ -74,10 +74,14 @@ export function Combobox(props: ComboboxProps) {
     const list = document.getElementById(combobox.listId);
     const input = document.querySelector(
       `[aria-owns="${combobox.listId}"]`,
-    ) as HTMLInputElement;
+    ) as HTMLInputElement | null;
+
+    if (!input) {
+      return;
+    }
 
     input.focus();
-    input.value = selectedValue || "";
+    input.value = index === -1 ? "" : selectedValue || "";
 
     if (typeof onOptionSelected === "function") {
       const [value, isEmpty] = getSelectedValue(list, listId, index);
@@ -88,10 +92,13 @@ export function Combobox(props: ComboboxProps) {
       }
     }
 
-    if (index !== -1) {
-      toggleOpen(false);
+    if (index === -1) {
       setHighlightedIndex(-1);
+      return;
     }
+
+    toggleOpen(false);
+    setHighlightedIndex(-1);
   }
 
   function handleOutsideClick(event: MouseEvent) {
@@ -148,7 +155,7 @@ export const ComboboxInput = React.forwardRef<
   ) {
     childrenCount > 0 && !isOpen && toggleOpen(true);
 
-    // Forwaerd events to parent handlers.
+    // Forward events to parent handlers.
     if (event.type === "input" && onInput) {
       onInput(event as React.FormEvent<HTMLInputElement>);
     } else if (event.type === "focus" && onFocus) {
@@ -162,7 +169,10 @@ export const ComboboxInput = React.forwardRef<
     const { key } = event;
 
     // When no results allow only for below keys.
-    if (!childrenCount && !["Escape", "Tab"].includes(key)) return;
+    if (!childrenCount && !["Escape", "Tab"].includes(key)) {
+      onKeyDown?.(event);
+      return;
+    }
 
     switch (key) {
       case "ArrowDown":
@@ -334,7 +344,7 @@ export function ComboboxItem(props: ComboboxItemProps) {
   const { children, value, empty = false, ...rest } = props;
 
   if (!isItemValue(value)) {
-    throw new Error("ComboboxItem value must be a string or number.");
+    throw new Error("ComboboxItem value must be a string or number when set.");
   }
 
   return (
@@ -363,8 +373,10 @@ function getSelectedValue(
   return [value, isEmpty];
 }
 
-function isItemValue(value: any): boolean {
+function isItemValue(value: unknown): boolean {
   return (
-    value === value || typeof value === "string" || typeof value === "number"
+    value === undefined ||
+    typeof value === "string" ||
+    typeof value === "number"
   );
 }
