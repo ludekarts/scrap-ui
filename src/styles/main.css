@@ -232,3 +232,15 @@ body {
     background-color: rgba(0, 0, 0, 0.05);
   }
 }
+
+/* DIALOGS */
+
+dialog {
+  margin: auto;
+  padding: 0.4em;
+  border-radius: 1em;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}

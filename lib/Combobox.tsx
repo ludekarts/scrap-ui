@@ -40,12 +40,12 @@ export interface ComboboxProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   // 👉 onOptionSelected can return a boolean value (true) to prevent closing the dropdown.
   onOptionSelected?: (
-    value: ComboboxSlection,
+    value: ComboboxSelection,
     isEmptyOption: boolean,
   ) => boolean | void;
 }
 
-export type ComboboxSlection = string | number | null;
+export type ComboboxSelection = string | number | null;
 
 export function Combobox(props: ComboboxProps) {
   const { children, selectedValue = "", onOptionSelected, ...rest } = props;
@@ -369,7 +369,7 @@ function getSelectedValue(
   list: HTMLElement | null,
   listId: string,
   index: number,
-): [ComboboxSlection, boolean] {
+): [ComboboxSelection, boolean] {
   if (!list) return [null, false];
   const item = list?.querySelector(`#${listId}-option-${index}`);
   if (!item) return [null, false];

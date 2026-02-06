@@ -7,7 +7,7 @@ import {
   ComboboxInput,
 } from "../../../lib/Combobox";
 
-import type { ComboboxSlection } from "../../../lib/Combobox";
+import type { ComboboxSelection } from "../../../lib/Combobox";
 import type { Fruit } from "./index";
 
 type MultiComboboxProps = {
@@ -94,7 +94,7 @@ function MultiCombobox(props: MultiComboboxProps) {
     }
   };
 
-  const selectItem = (item: ComboboxSlection) => {
+  const selectItem = (item: ComboboxSelection) => {
     if (item) {
       if (collection.includes(item as string)) return;
       setCollection((prev) => [...prev, item as string]);

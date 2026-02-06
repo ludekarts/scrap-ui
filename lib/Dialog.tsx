@@ -5,11 +5,11 @@ import React, { useRef, useEffect, useSyncExternalStore } from "react";
 // Types.
 import type { FormFieldsOptions } from "@ludekarts/utility-belt";
 
-interface DialogProps extends React.HTMLAttributes<HTMLDialogElement> {
+interface DialogComponentProps extends React.HTMLAttributes<HTMLDialogElement> {
   noDismiss?: boolean;
 }
 
-interface CreateDialogOptions {
+interface DialogCreateOptions {
   name?: string;
   animate?: boolean;
   outDelay?: number;
@@ -17,9 +17,9 @@ interface CreateDialogOptions {
   formParser?: FormFieldsOptions;
 }
 
-type Resolver = (data?: any) => void;
-type OpenProps = Record<string, any> | undefined;
-type CreateDialogController<R = any, P = OpenProps> = {
+type DialogResolve = (data?: any) => void;
+type DialogOpenProps = Record<string, any> | undefined;
+type DialogController<R = any, P = DialogOpenProps> = {
   open: (props?: P) => Promise<R>;
   close: (
     data?: R | React.FormEvent<HTMLFormElement> | React.MouseEvent,
@@ -28,9 +28,9 @@ type CreateDialogController<R = any, P = OpenProps> = {
   useDialogState: () => { isOpen: boolean } & P;
 };
 
-export function createDialog<R, P extends OpenProps = {}>(
-  options: CreateDialogOptions = {},
-): [React.FC<DialogProps>, CreateDialogController<R | undefined, P>] {
+export function createDialog<R, P extends DialogOpenProps = {}>(
+  options: DialogCreateOptions = {},
+): [React.FC<DialogComponentProps>, DialogController<R | undefined, P>] {
   const {
     name,
     formParser,
@@ -41,7 +41,7 @@ export function createDialog<R, P extends OpenProps = {}>(
   const dialogId = getDialogId(name);
   const dialogStore = createDialogStore<R, P>(forceOpen, outDelay);
 
-  const Dialog = (props: DialogProps) => {
+  const Dialog = (props: DialogComponentProps) => {
     const { children, noDismiss, className } = props;
     const dialog = useRef<HTMLDialogElement>(null);
     const { isOpen } = useDialogState();
@@ -167,7 +167,7 @@ export function createDialog<R, P extends OpenProps = {}>(
   // Dialog Controller API.
 
   const dialogController = {
-    async open(props?: OpenProps) {
+    async open(props?: DialogOpenProps) {
       return new Promise<R | undefined>((resolve) => {
         dialogStore.openDialog(resolve, props);
       });
@@ -211,7 +211,7 @@ export function createDialog<R, P extends OpenProps = {}>(
 
 function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
   const listeners = new Set<() => void>();
-  let resolver: Resolver | undefined;
+  let resolver: DialogResolve | undefined;
   let state = { isOpen: forceOpen } as { isOpen: boolean } & P;
   let dialogRef: HTMLDialogElement | null = null;
   let lastActiveElement: HTMLElement | null = null;
@@ -220,7 +220,7 @@ function createDialogStore<R, P>(forceOpen: boolean, outDelay: number) {
     listeners.forEach((cb) => cb());
   };
   return {
-    openDialog(resolve: Resolver, props: OpenProps = {}) {
+    openDialog(resolve: DialogResolve, props: DialogOpenProps = {}) {
       if (timer) {
         clearTimeout(timer);
         timer = null;

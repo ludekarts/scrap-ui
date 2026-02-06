@@ -7,7 +7,7 @@ import "../lib/style.css";
 
 // Sections.
 import PopupMenuSection from "./sections/PopupMenuSection";
-import ComboboxSection from "./sections/ComboboxSexrion";
+import ComboboxSection from "./sections/ComboboxSection";
 import DialogSection from "./sections/DialogSection";
 
 // Playground.
