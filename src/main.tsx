@@ -9,6 +9,7 @@ import "../lib/style.css";
 import PopupMenuSection from "./sections/PopupMenuSection";
 import ComboboxSection from "./sections/ComboboxSection";
 import DialogSection from "./sections/DialogSection";
+import ComboDialogExample from "../trash/_old/ComboDialogExample";
 
 // Playground.
 createRoot(document.getElementById("root")!).render(
@@ -42,6 +43,7 @@ createRoot(document.getElementById("root")!).render(
       <section id="dialog">
         <h2 className="bangers shadow-hard">Dialog</h2>
         <DialogSection />
+        <ComboDialogExample />
       </section>
       <section id="combobox">
         <h2 className="bangers shadow-hard">Combobox</h2>

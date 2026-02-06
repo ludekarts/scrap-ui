@@ -35,7 +35,7 @@ export default function DialogSection() {
   return (
     <div>
       <p className="text-frame">
-        Dialog is a small helper for building modal dialogs with an imperative
+        Dialog2 is a small helper for building modal dialogs with an imperative
         controller. The example below shows a normal form close and a no-dismiss
         dialog where method="dialog" submits do not close it.
       </p>

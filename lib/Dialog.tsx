@@ -126,12 +126,9 @@ export function createDialog<
       event: React.KeyboardEvent<HTMLDialogElement>,
     ) => {
       if (event.key === "Escape") {
-        if (noDismiss) {
-          event.stopPropagation();
-          event.preventDefault();
-        } else {
-          dialogStore.closeDialog();
-        }
+        event.preventDefault();
+        event.stopPropagation();
+        !noDismiss && dialogStore.closeDialog();
       }
     };
 
@@ -260,17 +257,18 @@ function createDialogStore<Result, OpenProps extends DialogOpenProps>(
     },
 
     closeDialog(data?: Result) {
-      state = { ...state, isOpen: false };
       if (dialogRef) {
         dialogRef.dataset.transition = "open-to-close";
       }
+
       resolver?.(data);
       resolver = undefined;
-      if (timer) {
-        clearTimeout(timer);
-      }
+      timer && clearTimeout(timer);
+
       timer = setTimeout(() => {
+        state = { ...state, isOpen: false };
         notify();
+
         // Restore focus to the last active element after dialog is closed.
         setTimeout(() => {
           if (lastActiveElement) {
