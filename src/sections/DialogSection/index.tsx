@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { createDialog } from "../../../lib/Dialog";
 
+type BasicDialogReturnData = { name: string; notes?: string };
+type BasicDialogOpenProps = { title?: string };
+
 const [BasicDialog, basicController] = createDialog<
-  { name: string; notes?: string },
-  { title?: string }
->({ animate: true, name: "basic-dialog" });
+  BasicDialogReturnData,
+  BasicDialogOpenProps
+>({
+  animate: true,
+  name: "basic-dialog",
+});
 
 const [LockedDialog, lockedController] = createDialog({
   animate: true,
@@ -18,6 +24,7 @@ export default function DialogSection() {
 
   const openBasic = async () => {
     const result = await basicController.open({ title: "Basic dialog" });
+
     setBasicResult(
       result ? JSON.stringify(result, null, 2) : "Closed without data",
     );
@@ -35,7 +42,7 @@ export default function DialogSection() {
   return (
     <div>
       <p className="text-frame">
-        Dialog2 is a small helper for building modal dialogs with an imperative
+        Dialog is a small helper for building modal dialogs with an imperative
         controller. The example below shows a normal form close and a no-dismiss
         dialog where method="dialog" submits do not close it.
       </p>
