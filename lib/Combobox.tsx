@@ -115,8 +115,8 @@ export function Combobox(props: ComboboxProps) {
 
   // Open list when it has any children.
   useEffect(() => {
-    childrenCount > 0 && toggleOpen(true);
-  }, [childrenCount]);
+    childrenCount > 0 && isOpen && toggleOpen(true);
+  }, [childrenCount, isOpen]);
 
   return (
     <ComboboxContext.Provider value={combobox}>
