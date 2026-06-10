@@ -1,9 +1,14 @@
 import { createDialog } from "../../../lib/useDialog";
+import { getFormFields } from "@ludekarts/utility-belt";
 
 export default function UseDialogSection() {
   async function handleOpenDialog() {
     const result = await SimpleDialog.open("apple");
-    console.log(result.name, result.age);
+    if (result) {
+      console.log(result.name, result.age);
+    } else {
+      console.log("Dialog was closed without submitting");
+    }
   }
 
   return (
@@ -31,7 +36,9 @@ type ReturnValue = {
 
 type OpenProps = string;
 
-const [useDialog, openDialog] = createDialog<ReturnValue, OpenProps>();
+const [useDialog, openDialog] = createDialog<ReturnValue, OpenProps>(
+  getFormFields<ReturnValue>,
+);
 
 const SimpleDialog = () => {
   const { dialogRef, closeDialog, useProps } = useDialog();
@@ -41,18 +48,39 @@ const SimpleDialog = () => {
     <dialog className="bg-black text-white" ref={dialogRef}>
       <header className="mb-4 flex items-center justify-between gap-4 text-lg">
         <span className="capitalize">{fruitName} is my favorite fruit!</span>
-        <button
-          className="text-black"
-          onClick={() => closeDialog({ name: "John", age: 30 })}
-        >
-          ✕
-        </button>
+
+        <form method="dialog">
+          <button
+            className="text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+            type="submit"
+          >
+            ✕
+          </button>
+        </form>
       </header>
       <form className="flex flex-col gap-2" onSubmit={closeDialog}>
-        <input name="name" placeholder="Your name" />
-        <input name="age" placeholder="Your age" />
-        <button className="text-black" type="submit">
+        <input
+          className="focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+          name="name"
+          placeholder="Your name"
+        />
+        <input
+          className="focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+          name="age"
+          placeholder="Your age"
+        />
+        <button
+          className="text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+          type="submit"
+        >
           Submit
+        </button>
+        <button
+          className="text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+          type="button"
+          onClick={() => closeDialog({ name: "John", age: 30 })}
+        >
+          Exirt with fixed value
         </button>
       </form>
     </dialog>

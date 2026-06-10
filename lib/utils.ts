@@ -24,3 +24,9 @@ function isFocusable(node: Element) {
     ),
   );
 }
+
+export function getFocusableHeadAndTail(
+  node: Element | null | undefined,
+): [Element | undefined, Element | undefined] {
+  return getHeadAndTail(getFocusableNodes(node));
+}
