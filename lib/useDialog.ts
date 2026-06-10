@@ -4,7 +4,7 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 
 type UseDialogApi<ReturnValue, OpenProps> = {
   dialogRef: RefObject<HTMLDialogElement>;
-  useProps: () => OpenProps | undefined;
+  useOpenProps: () => OpenProps | undefined;
   closeDialog: (
     value?:
       | ReturnValue
@@ -47,7 +47,7 @@ export function createDialog<ReturnValue, OpenProps>(
     const [props, setProps] = useState<OpenProps>();
     const dialogRef = useRef<HTMLDialogElement>(null);
 
-    function useProps() {
+    function useOpenProps() {
       return props;
     }
 
@@ -71,9 +71,7 @@ export function createDialog<ReturnValue, OpenProps>(
     useEffect(() => {
       let keybordHandler: ((event: KeyboardEvent) => void) | undefined;
 
-      if (setDialogProps !== setProps) {
-        setDialogProps = setProps;
-      }
+      setDialogProps = setProps;
 
       if (dialogRef.current !== null) {
         ref = dialogRef.current;
@@ -120,8 +118,8 @@ export function createDialog<ReturnValue, OpenProps>(
 
     return {
       dialogRef,
-      useProps,
       closeDialog,
+      useOpenProps,
     };
   }
 

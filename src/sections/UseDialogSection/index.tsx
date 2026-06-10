@@ -55,8 +55,8 @@ const [useDialog, openDialog] = createDialog<ReturnValue, OpenProps>(
 
 const SimpleDialog = () => {
   const [showAdders, setShowAdders] = useState(false);
-  const { dialogRef, closeDialog, useProps } = useDialog();
-  const fruitName = useProps();
+  const { dialogRef, closeDialog, useOpenProps } = useDialog();
+  const fruitName = useOpenProps();
 
   return (
     <dialog className="bg-black text-white" ref={dialogRef}>
