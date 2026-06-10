@@ -57,13 +57,14 @@ export function createDialog<ReturnValue, OpenProps>(
         | React.MouseEvent<HTMLElement>
         | React.FormEvent<HTMLFormElement>,
     ) {
-      // Handle close by form submission.
-      if ((value as React.FormEvent).type === "submit") {
-        (value as React.FormEvent).preventDefault();
-        const form = (value as React.FormEvent<HTMLFormElement>).currentTarget;
+      if (isSubmitEvent(value)) {
+        value.preventDefault();
+        const form = value.currentTarget;
         closeWithValue(formParser?.(form));
+      } else if (isClickEvent(value)) {
+        closeWithValue();
       } else {
-        closeWithValue(value as ReturnValue);
+        closeWithValue(value);
       }
     }
 
@@ -135,4 +136,30 @@ export function createDialog<ReturnValue, OpenProps>(
   }
 
   return [useDialog, openDialog];
+}
+
+// ---- Helpers ----------------
+
+function isSubmitEvent(
+  value: unknown,
+): value is React.FormEvent<HTMLFormElement> {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "type" in value &&
+    value.type === "submit" &&
+    "currentTarget" in value &&
+    value.currentTarget instanceof HTMLFormElement,
+  );
+}
+
+function isClickEvent(value: unknown): value is React.MouseEvent<HTMLElement> {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "type" in value &&
+    value.type === "click" &&
+    "currentTarget" in value &&
+    value.currentTarget instanceof HTMLElement,
+  );
 }
