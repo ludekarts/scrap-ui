@@ -24,20 +24,21 @@ export function createDialog<ReturnValue, OpenProps>(
   let resolveDialogResult: ((value: ReturnValue | undefined) => void) | null =
     null;
 
+  let dialogCloseValue: ReturnValue | undefined;
+
   let setDialogProps: Dispatch<SetStateAction<OpenProps | undefined>> | null =
     null;
 
-  // Close on ESC and <form method="dialog">.
+  // Runs on every dialog "close" event, including ESC and <form method="dialog">.
   function closeHandle() {
-    ref?.close();
-    resolveDialogResult?.(undefined);
+    resolveDialogResult?.(dialogCloseValue);
     resolveDialogResult = null;
+    dialogCloseValue = undefined;
   }
 
-  function closeHandleWithValue(value?: ReturnValue) {
+  function closeWithValue(value?: ReturnValue) {
+    dialogCloseValue = value;
     ref?.close();
-    resolveDialogResult?.(value);
-    resolveDialogResult = null;
   }
 
   // ---- API ----------------
@@ -60,9 +61,9 @@ export function createDialog<ReturnValue, OpenProps>(
       if ((value as React.FormEvent).type === "submit") {
         (value as React.FormEvent).preventDefault();
         const form = (value as React.FormEvent<HTMLFormElement>).currentTarget;
-        closeHandleWithValue(formParser?.(form));
+        closeWithValue(formParser?.(form));
       } else {
-        closeHandleWithValue(value as ReturnValue);
+        closeWithValue(value as ReturnValue);
       }
     }
 
@@ -125,10 +126,10 @@ export function createDialog<ReturnValue, OpenProps>(
 
   function openDialog(openProps?: OpenProps) {
     setDialogProps?.(openProps);
-
     return new Promise<ReturnValue | undefined>((resolve) => {
       resolveDialogResult?.(undefined);
       resolveDialogResult = resolve;
+      dialogCloseValue = undefined;
       ref?.showModal();
     });
   }

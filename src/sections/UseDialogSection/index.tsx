@@ -1,11 +1,14 @@
 import { createDialog } from "../../../lib/useDialog";
 import { getFormFields } from "@ludekarts/utility-belt";
+import { useState } from "react";
 
 export default function UseDialogSection() {
+  const [fruit, setFruit] = useState("apple");
+
   async function handleOpenDialog() {
-    const result = await SimpleDialog.open("apple");
+    const result = await SimpleDialog.open(fruit);
     if (result) {
-      console.log(result.name, result.age);
+      console.log(result);
     } else {
       console.log("Dialog was closed without submitting");
     }
@@ -17,12 +20,22 @@ export default function UseDialogSection() {
         Simpler version of Dialog that only provides the Hook API.
       </p>
 
-      <div>
-        <SimpleDialog />
+      <div className="flex items-center gap-4">
+        <select
+          id="fruits"
+          name="fruits"
+          onChange={(e) => setFruit(e.target.value)}
+          className="rounded-lg border-2 border-black bg-white p-2 text-black"
+        >
+          <option value="apple">Apple 🍎</option>
+          <option value="banana">Banana 🍌</option>
+          <option value="orange">Orange 🍊</option>
+        </select>
         <button className="h-10" onClick={handleOpenDialog}>
           Open Simple Dialog
         </button>
       </div>
+      <SimpleDialog />
     </div>
   );
 }
@@ -41,6 +54,7 @@ const [useDialog, openDialog] = createDialog<ReturnValue, OpenProps>(
 );
 
 const SimpleDialog = () => {
+  const [showAdders, setShowAdders] = useState(false);
   const { dialogRef, closeDialog, useProps } = useDialog();
   const fruitName = useProps();
 
@@ -69,6 +83,29 @@ const SimpleDialog = () => {
           name="age"
           placeholder="Your age"
         />
+        <select
+          id="fruit"
+          name="fruit"
+          className="rounded-lg border-2 border-black bg-white p-2 text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+        >
+          <option value="strawberry">Strawberry 🍓</option>
+          <option value="pineapple">Pineapple 🍍</option>
+          <option value="mango">Mango 🥭</option>
+        </select>
+        <button
+          className="text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+          type="button"
+          onClick={() => setShowAdders(!showAdders)}
+        >
+          Show adders
+        </button>
+        {showAdders && (
+          <input
+            className="focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+            name="adders"
+            placeholder="Your adders"
+          />
+        )}
         <button
           className="text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
           type="submit"
@@ -80,7 +117,7 @@ const SimpleDialog = () => {
           type="button"
           onClick={() => closeDialog({ name: "John", age: 30 })}
         >
-          Exirt with fixed value
+          Exit with fixed value
         </button>
       </form>
     </dialog>
