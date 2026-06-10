@@ -78,11 +78,11 @@ export function createDialog<ReturnValue, OpenProps>(
       if (dialogRef.current !== null) {
         ref = dialogRef.current;
 
-        const [head, tail] = getFocusableHeadAndTail(dialogRef.current);
-
         keybordHandler = (event: KeyboardEvent) => {
           // Handle Tab key focus navigation.
           if (event.key === "Tab") {
+            const [head, tail] = getFocusableHeadAndTail(dialogRef.current);
+
             // Escape if there are no focusable nodes.
             if (!head || !tail) {
               return;
