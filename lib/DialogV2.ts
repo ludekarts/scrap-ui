@@ -13,20 +13,26 @@ type UseDialogApi<ReturnValue, OpenProps> = {
   ) => void;
 };
 
-export function createDialog<ReturnValue, OpenProps>(
-  formParser?: (form: HTMLFormElement) => ReturnValue,
-): [
+type CreateDialogOptions<ReturnValue> = {
+  formParser?: (form: HTMLFormElement) => ReturnValue;
+  noDismiss?: boolean;
+};
+
+export function createDialog_v2<ReturnValue, OpenProps>({
+  formParser,
+  noDismiss = false,
+}: CreateDialogOptions<ReturnValue>): [
   () => UseDialogApi<ReturnValue, OpenProps>,
   (openProps?: OpenProps) => Promise<ReturnValue | undefined>,
 ] {
   let ref: HTMLDialogElement | null = null;
 
-  let resolveDialogResult: ((value: ReturnValue | undefined) => void) | null =
-    null;
-
   let dialogCloseValue: ReturnValue | undefined;
 
   let setDialogProps: Dispatch<SetStateAction<OpenProps | undefined>> | null =
+    null;
+
+  let resolveDialogResult: ((value: ReturnValue | undefined) => void) | null =
     null;
 
   // Runs on every dialog "close" event, including ESC and <form method="dialog">.
@@ -102,6 +108,10 @@ export function createDialog<ReturnValue, OpenProps>(
               }
             }
           }
+          // Prevent Escape key from closing the dialog when "noDismiss".
+          else if (event.key === "Escape" && noDismiss) {
+            event.preventDefault();
+          }
         };
 
         ref?.addEventListener("close", closeHandle as EventListener);
@@ -136,7 +146,7 @@ export function createDialog<ReturnValue, OpenProps>(
   return [useDialog, openDialog];
 }
 
-// ---- Helpers ----------------
+// ---- Validators ----------------
 
 function isSubmitEvent(
   value: unknown,

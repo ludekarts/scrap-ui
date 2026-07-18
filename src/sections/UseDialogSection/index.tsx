@@ -1,4 +1,4 @@
-import { createDialog } from "../../../lib/useDialog";
+import { createDialog_v2 as createDialog } from "../../../lib/DialogV2";
 import { getFormFields } from "@ludekarts/utility-belt";
 import { useState } from "react";
 
@@ -49,9 +49,10 @@ type ReturnValue = {
 
 type OpenProps = string;
 
-const [useDialog, openDialog] = createDialog<ReturnValue, OpenProps>(
-  getFormFields<ReturnValue>,
-);
+const [useDialog, openDialog] = createDialog<ReturnValue, OpenProps>({
+  formParser: getFormFields<ReturnValue>,
+  noDismiss: true,
+});
 
 const SimpleDialog = () => {
   const [showAdders, setShowAdders] = useState(false);
@@ -59,7 +60,7 @@ const SimpleDialog = () => {
   const fruitName = useOpenProps();
 
   return (
-    <dialog className="bg-black text-white" ref={dialogRef}>
+    <dialog ref={dialogRef} className="sui-dialog bg-black text-white">
       <header className="mb-4 flex items-center justify-between gap-4 text-lg">
         <span className="capitalize">{fruitName} is my favorite fruit!</span>
 
@@ -99,13 +100,7 @@ const SimpleDialog = () => {
         >
           Show adders
         </button>
-        {showAdders && (
-          <input
-            className="focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-            name="adders"
-            placeholder="Your adders"
-          />
-        )}
+
         <button
           className="text-black focus:ring-2 focus:ring-yellow-500 focus:outline-none"
           type="submit"
@@ -119,6 +114,13 @@ const SimpleDialog = () => {
         >
           Exit with fixed value
         </button>
+        {showAdders && (
+          <input
+            className="focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+            name="adders"
+            placeholder="Your adders"
+          />
+        )}
       </form>
     </dialog>
   );

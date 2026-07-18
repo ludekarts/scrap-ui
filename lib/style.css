@@ -25,6 +25,42 @@ dialog.sui-animate[data-transition="close-to-open"] {
   }
 }
 
+/* DIALOG V2 */
+
+dialog.sui-dialog {
+  display: none;
+  animation: dialog-close var(--scrap-ui-anim-duration) ease;
+
+  &[open] {
+    display: block;
+    animation: dialog-open var(--scrap-ui-anim-duration) ease;
+  }
+}
+
+@keyframes dialog-open {
+  from {
+    opacity: 0;
+    transform: translateY(2em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-close {
+  from {
+    opacity: 1;
+    display: block;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    display: none;
+    transform: translateY(2em);
+  }
+}
+
 /* POPOVER */
 
 .sui-anchor-button {
