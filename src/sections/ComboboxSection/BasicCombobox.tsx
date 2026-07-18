@@ -7,7 +7,7 @@ import {
   ComboboxInput,
 } from "../../../lib/Combobox";
 
-import type { ComboboxSlection } from "../../../lib/Combobox";
+import type { ComboboxSelection } from "../../../lib/Combobox";
 import type { Fruit } from "./index";
 
 interface ExampleProps {
@@ -22,7 +22,7 @@ export default function BasicComboboxExample(props: ExampleProps) {
   const [phrase, setPhrase] = useState<string>("");
   const [selectedValue, setSelectedValue] = useState<string>();
 
-  const selectOption = (value: ComboboxSlection) => {
+  const selectOption = (value: ComboboxSelection) => {
     setSelectedValue(fruitsNames.find((f) => f === value));
   };
 

@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -7,7 +9,10 @@ import "../lib/style.css";
 
 // Sections.
 import PopupMenuSection from "./sections/PopupMenuSection";
-import ComboboxSection from "./sections/ComboboxSexrion";
+import ComboboxSection from "./sections/ComboboxSection";
+import DialogSection from "./sections/DialogSection";
+import UseDialogSection from "./sections/UseDialogSection";
+// import ComboDialogExample from "../trash/_old/ComboDialogExample";
 
 // Playground.
 createRoot(document.getElementById("root")!).render(
@@ -40,6 +45,12 @@ createRoot(document.getElementById("root")!).render(
     <main>
       <section id="dialog">
         <h2 className="bangers shadow-hard">Dialog</h2>
+        <DialogSection />
+        {/* <ComboDialogExample /> */}
+      </section>
+      <section id="use-dialog">
+        <h2 className="bangers shadow-hard">UseDialog</h2>
+        <UseDialogSection />
       </section>
       <section id="combobox">
         <h2 className="bangers shadow-hard">Combobox</h2>

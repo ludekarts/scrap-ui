@@ -25,6 +25,42 @@ dialog.sui-animate[data-transition="close-to-open"] {
   }
 }
 
+/* DIALOG V2 */
+
+dialog.sui-dialog {
+  display: none;
+  animation: dialog-close var(--scrap-ui-anim-duration) ease;
+
+  &[open] {
+    display: block;
+    animation: dialog-open var(--scrap-ui-anim-duration) ease;
+  }
+}
+
+@keyframes dialog-open {
+  from {
+    opacity: 0;
+    transform: translateY(2em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-close {
+  from {
+    opacity: 1;
+    display: block;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    display: none;
+    transform: translateY(2em);
+  }
+}
+
 /* POPOVER */
 
 .sui-anchor-button {
@@ -32,11 +68,19 @@ dialog.sui-animate[data-transition="close-to-open"] {
 }
 
 .sui-anchor-menu {
-  inset: auto;
   position: absolute;
+  inset: auto;
   position-anchor: var(--sui-anchor-name);
-  position-try-fallbacks: --popover-right;
-  position-try-fallbacks: --popover-bottom;
+
+  position-try-order: most-height;
+  position-try-fallbacks:
+    flip-block,
+    flip-inline,
+    flip-block flip-inline,
+    --popover-bottom,
+    --popover-top,
+    --popover-right,
+    --popover-left;
 
   &.tr {
     right: anchor(right);
@@ -59,14 +103,26 @@ dialog.sui-animate[data-transition="close-to-open"] {
   }
 }
 
+@position-try --popover-bottom {
+  inset: unset;
+  top: anchor(bottom);
+  left: anchor(left);
+}
+
+@position-try --popover-top {
+  inset: unset;
+  bottom: anchor(top);
+  left: anchor(left);
+}
+
 @position-try --popover-right {
   inset: unset;
   top: anchor(bottom);
-  right: anchor(right);
+  left: anchor(right);
 }
 
-@position-try --popover-bottom {
+@position-try --popover-left {
   inset: unset;
-  bottom: anchor(top);
-  right: anchor(right);
+  top: anchor(bottom);
+  right: anchor(left);
 }

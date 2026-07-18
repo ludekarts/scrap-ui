@@ -45,7 +45,7 @@ body {
     }
   }
 
-  input:not([data-tw]) {
+  input {
     border-radius: 0.5em;
     font-size: inherit;
     font-family: inherit;
@@ -230,5 +230,17 @@ body {
     border-radius: 1em;
     border: 2px dashed rgba(0, 0, 0, 0.75);
     background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* DIALOGS */
+
+dialog {
+  margin: auto;
+  padding: 0.4em;
+  border-radius: 1em;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
   }
 }

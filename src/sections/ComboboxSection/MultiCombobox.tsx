@@ -7,7 +7,7 @@ import {
   ComboboxInput,
 } from "../../../lib/Combobox";
 
-import type { ComboboxSlection } from "../../../lib/Combobox";
+import type { ComboboxSelection } from "../../../lib/Combobox";
 import type { Fruit } from "./index";
 
 type MultiComboboxProps = {
@@ -94,7 +94,7 @@ function MultiCombobox(props: MultiComboboxProps) {
     }
   };
 
-  const selectItem = (item: ComboboxSlection) => {
+  const selectItem = (item: ComboboxSelection) => {
     if (item) {
       if (collection.includes(item as string)) return;
       setCollection((prev) => [...prev, item as string]);
@@ -132,7 +132,6 @@ function MultiCombobox(props: MultiComboboxProps) {
                 {item}
                 <button
                   type="button"
-                  data-tw="true"
                   data-index={item}
                   onClick={removeItem}
                   className="flex size-5 cursor-pointer items-center justify-center rounded-full"
@@ -143,7 +142,6 @@ function MultiCombobox(props: MultiComboboxProps) {
             ))}
         <ComboboxInput
           id={id}
-          data-tw="true"
           onChange={updateValue}
           onKeyDown={traceBckspace}
           aria-labelledby={`${id}-desc`}

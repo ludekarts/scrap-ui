@@ -76,7 +76,7 @@ export default function ComboboxSection() {
             <li>
               <code>onOptionSelected?</code>
               <span>
-                (value: ComboboxSlection, isEmptyOption: boolean) void
+                (value: ComboboxSelection, isEmptyOption: boolean) void
               </span>
             </li>
           </ul>

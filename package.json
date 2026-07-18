@@ -1,7 +1,7 @@
 {
   "name": "@ludekarts/scrap-ui",
   "private": false,
-  "version": "0.1.4",
+  "version": "0.1.5-beta.4",
   "type": "module",
   "files": [
     "dist"
@@ -21,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/ludekarts/scrap-ui.git"
   },
-  "homepage": "https://github.com/ludekarts/latte#readme",
+  "homepage": "https://github.com/ludekarts/scrap-ui#readme",
   "sideEffects": false,
   "scripts": {
     "dev": "vite",
@@ -32,8 +32,8 @@
   },
   "dependencies": {
     "@ludekarts/utility-belt": "^0.8.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
