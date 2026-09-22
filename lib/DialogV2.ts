@@ -18,13 +18,14 @@ type CreateDialogOptions<ReturnValue> = {
   noDismiss?: boolean;
 };
 
-export function createDialog_v2<ReturnValue, OpenProps>({
-  formParser,
-  noDismiss = false,
-}: CreateDialogOptions<ReturnValue>): [
+export function createDialog_v2<ReturnValue, OpenProps>(
+  createConfig?: CreateDialogOptions<ReturnValue>,
+): [
   () => UseDialogApi<ReturnValue, OpenProps>,
   (openProps?: OpenProps) => Promise<ReturnValue | undefined>,
 ] {
+  const { formParser, noDismiss = false } = createConfig ?? {};
+
   let ref: HTMLDialogElement | null = null;
 
   let dialogCloseValue: ReturnValue | undefined;
